@@ -16,6 +16,7 @@ import {
 import { Leaf, Package, ShoppingBag, LayoutDashboard, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 
 // For this example, we'll use a hardcoded admin email.
 // In a real application, you would manage roles in a database.
