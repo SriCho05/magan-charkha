@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { products } from "@/lib/data";
-import { type Product } from "@/lib/types";
+import { useProducts } from "@/providers/product-provider";
 import ProductCard from "@/components/product-card";
 import {
   Select,
@@ -15,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function Home() {
+  const { products } = useProducts();
   const [filters, setFilters] = useState({
     category: "all",
     color: "all",
@@ -47,7 +47,7 @@ export default function Home() {
       }
       return 0;
     });
-  }, [filters, sort]);
+  }, [products, filters, sort]);
 
   const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))];
   const colors = ["all", ...Array.from(new Set(products.map(p => p.color)))];

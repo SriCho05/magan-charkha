@@ -1,7 +1,7 @@
 "use client";
 
 import { notFound } from "next/navigation";
-import { products } from "@/lib/data";
+import { useProducts } from "@/providers/product-provider";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
@@ -11,6 +11,7 @@ import { ShoppingCart } from "lucide-react";
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const { addToCart } = useCart();
+  const { products } = useProducts();
   const product = products.find((p) => p.id === params.id);
 
   if (!product) {
