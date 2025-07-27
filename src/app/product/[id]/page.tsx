@@ -1,62 +1,21 @@
-"use client";
 
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/hooks/use-cart";
 import ProductSuggestions from "@/components/product-suggestions";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
 import { getProductById } from "@/lib/actions/product-actions";
-import { useEffect, useState } from "react";
 import type { Product } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useCart } from "@/hooks/use-cart";
 
-function ProductPageSkeleton() {
-    return (
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-            <div><Skeleton className="w-full h-[500px] rounded-lg" /></div>
-            <div className="space-y-4">
-                <Skeleton className="h-6 w-1/4" />
-                <Skeleton className="h-12 w-3/4" />
-                <Skeleton className="h-8 w-1/3" />
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-12 w-1/2" />
-            </div>
-        </div>
-    )
-}
-
-export default function ProductPage({ params }: { params: { id: string } }) {
+function ProductPageContent({ product }: { product: Product }) {
+  'use client';
+  
   const { addToCart } = useCart();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-      const fetchProduct = async () => {
-          setLoading(true);
-          const fetchedProduct = await getProductById(params.id);
-          setProduct(fetchedProduct);
-          setLoading(false);
-      }
-      fetchProduct();
-  }, [params.id]);
-
-
-  if (loading) {
-      return (
-          <div className="container mx-auto px-4 py-12">
-              <ProductPageSkeleton />
-          </div>
-      )
-  }
-
-  if (!product) {
-    notFound();
-  }
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <>
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <div className="animate-fade-in">
           <Image
@@ -102,6 +61,22 @@ export default function ProductPage({ params }: { params: { id: string } }) {
       <div className="mt-16">
         <ProductSuggestions productDescription={product.description} />
       </div>
+    </>
+  );
+}
+
+
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await getProductById(params.id);
+
+  if (!product) {
+    notFound();
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <ProductPageContent product={product} />
     </div>
   );
 }
+
