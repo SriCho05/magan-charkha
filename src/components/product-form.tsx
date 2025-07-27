@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/providers/product-provider";
-import { useToast } from "./hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -49,7 +50,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData || {
+    defaultValues: initialData ? {
+        ...initialData
+    } : {
       name: "",
       description: "",
       price: 0,
@@ -60,16 +63,20 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     },
   });
 
-  const onSubmit = (data: ProductFormValues) => {
-    if (initialData) {
-      updateProduct({ ...initialData, ...data });
-       toast({ title: "Product updated successfully!" });
-    } else {
-      addProduct({ id: new Date().toISOString(), ...data });
-       toast({ title: "Product created successfully!" });
+  const onSubmit = async (data: ProductFormValues) => {
+    try {
+        if (initialData) {
+            await updateProduct({ ...initialData, ...data });
+            toast({ title: "Product updated successfully!" });
+        } else {
+            await addProduct(data);
+            toast({ title: "Product created successfully!" });
+        }
+        router.push("/admin/products");
+        router.refresh();
+    } catch (error) {
+        toast({ title: "An error occurred.", variant: "destructive" });
     }
-    router.push("/admin/products");
-    router.refresh();
   };
 
   return (
