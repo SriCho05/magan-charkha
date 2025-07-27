@@ -59,7 +59,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     };
 
     if (!authLoading) {
-        fetchProducts();
+      fetchProducts();
     }
   }, [authLoading, toast]);
 
