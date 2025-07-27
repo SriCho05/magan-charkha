@@ -67,7 +67,7 @@ export default function Home() {
     }
 
     if (filters.color !== "all") {
-      filtered = filtered.filter((p) => p.color === filters.color);
+      filtered = filtered.filter((p) => p.color === p.color);
     }
 
     const [sortKey, sortDirection] = sort.split("-");
