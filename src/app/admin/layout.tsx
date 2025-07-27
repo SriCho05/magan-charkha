@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 
 // For this example, we'll use a hardcoded admin email.
 // In a real application, you would manage roles in a database.
-const ADMIN_EMAIL = "admin@khadikraft.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@khadikraft.com";
 
 export default function AdminLayout({
   children,
@@ -117,9 +117,9 @@ export default function AdminLayout({
         <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
         <h1 className="text-3xl font-headline font-bold">Unauthorized</h1>
         <p className="text-muted-foreground mt-2">You do not have permission to view this page.</p>
-        <Button asChild onClick={() => router.push('/')} className="mt-6">
-            Go to Homepage
+        <Button asChild className="mt-6">
+            <Link href="/">Go to Homepage</Link>
         </Button>
         </div>
-  )
+    );
 }
