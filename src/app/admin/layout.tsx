@@ -37,7 +37,7 @@ export default function AdminLayout({
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p>Loading...</p>
@@ -45,7 +45,7 @@ export default function AdminLayout({
     );
   }
   
-  if (user.email !== ADMIN_EMAIL) {
+  if (!user || user.email !== ADMIN_EMAIL) {
     return (
          <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center">
             <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
