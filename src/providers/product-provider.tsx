@@ -63,7 +63,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     try {
       const productsCollection = collection(db, 'products');
       const docRef = await addDoc(productsCollection, productData);
-      const newProduct: Product = { id: docRef.id, ...(productData as Omit<Product, 'id' | 'price' | 'stock'>), price: productData.price, stock: productData.stock };
+      const newProduct: Product = { id: docRef.id, ...productData };
       setProducts(prevProducts => [...prevProducts, newProduct]);
     } catch (error) {
         console.error("Error adding product: ", error);
