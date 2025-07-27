@@ -1,4 +1,6 @@
 
+'use client';
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -8,10 +10,9 @@ import { ShoppingCart } from "lucide-react";
 import { getProductById } from "@/lib/actions/product-actions";
 import type { Product } from "@/lib/types";
 import { useCart } from "@/hooks/use-cart";
+import { useEffect, useState } from "react";
 
 function ProductPageContent({ product }: { product: Product }) {
-  'use client';
-  
   const { addToCart } = useCart();
 
   return (
@@ -66,11 +67,34 @@ function ProductPageContent({ product }: { product: Product }) {
 }
 
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await getProductById(params.id);
+export default function ProductPage({ params }: { params: { id: string } }) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (params.id) {
+      const fetchProduct = async () => {
+        setLoading(true);
+        const fetchedProduct = await getProductById(params.id);
+        if (fetchedProduct) {
+          setProduct(fetchedProduct);
+        } else {
+          notFound();
+        }
+        setLoading(false);
+      };
+      fetchProduct();
+    }
+  }, [params.id]);
+
+
+  if (loading) {
+    // You can add a proper skeleton loader here
+    return <div className="container mx-auto px-4 py-12">Loading...</div>;
+  }
+  
   if (!product) {
-    notFound();
+      return notFound();
   }
 
   return (
@@ -79,4 +103,3 @@ export default async function ProductPage({ params }: { params: { id: string } }
     </div>
   );
 }
-
