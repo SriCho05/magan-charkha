@@ -1,18 +1,55 @@
 "use client";
 
 import { notFound } from "next/navigation";
-import { useProducts } from "@/providers/product-provider";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import ProductSuggestions from "@/components/product-suggestions";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart } from "lucide-react";
+import { getProductById } from "@/lib/actions/product-actions";
+import { useEffect, useState } from "react";
+import type { Product } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function ProductPageSkeleton() {
+    return (
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            <div><Skeleton className="w-full h-[500px] rounded-lg" /></div>
+            <div className="space-y-4">
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-12 w-3/4" />
+                <Skeleton className="h-8 w-1/3" />
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-12 w-1/2" />
+            </div>
+        </div>
+    )
+}
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const { addToCart } = useCart();
-  const { products } = useProducts();
-  const product = products.find((p) => p.id === params.id);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+      const fetchProduct = async () => {
+          setLoading(true);
+          const fetchedProduct = await getProductById(params.id);
+          setProduct(fetchedProduct);
+          setLoading(false);
+      }
+      fetchProduct();
+  }, [params.id]);
+
+
+  if (loading) {
+      return (
+          <div className="container mx-auto px-4 py-12">
+              <ProductPageSkeleton />
+          </div>
+      )
+  }
 
   if (!product) {
     notFound();

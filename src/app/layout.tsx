@@ -5,7 +5,6 @@ import { CartProvider } from "@/providers/cart-provider";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { AuthProvider } from "@/providers/auth-provider";
-import { ProductProvider } from "@/providers/product-provider";
 
 export const metadata: Metadata = {
   title: "Khadi Kraft",
@@ -37,16 +36,14 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
         <AuthProvider>
-            <ProductProvider>
-                <CartProvider>
-                    <div className="flex-grow flex flex-col">
-                      <Header />
-                      <main className="flex-grow">{children}</main>
-                    </div>
-                    <Footer />
-                    <Toaster />
-                </CartProvider>
-            </ProductProvider>
+          <CartProvider>
+              <div className="flex-grow flex flex-col">
+                <Header />
+                <main className="flex-grow">{children}</main>
+              </div>
+              <Footer />
+              <Toaster />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

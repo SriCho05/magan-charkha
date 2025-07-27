@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -24,8 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { useProducts } from "@/providers/product-provider";
 import { useToast } from "@/hooks/use-toast";
+import { addProduct, updateProduct } from "@/lib/actions/product-actions";
+import { useState } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -45,14 +45,12 @@ interface ProductFormProps {
 
 export default function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
-  const { addProduct, updateProduct } = useProducts();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData ? {
-        ...initialData
-    } : {
+    defaultValues: initialData || {
       name: "",
       description: "",
       price: 0,
@@ -64,9 +62,10 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   });
 
   const onSubmit = async (data: ProductFormValues) => {
+    setIsSubmitting(true);
     try {
         if (initialData) {
-            await updateProduct({ ...initialData, ...data });
+            await updateProduct({ id: initialData.id, ...data });
             toast({ title: "Product updated successfully!" });
         } else {
             await addProduct(data);
@@ -75,7 +74,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         router.push("/admin/products");
         router.refresh();
     } catch (error) {
-        toast({ title: "An error occurred.", variant: "destructive" });
+        toast({ title: "An error occurred.", description: "Could not save the product. Please try again.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
     }
   };
 
@@ -201,7 +202,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                 </FormItem>
             )}
         />
-        <Button type="submit">{initialData ? 'Save changes' : 'Create product'}</Button>
+        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : initialData ? 'Save changes' : 'Create product'}</Button>
       </form>
     </Form>
   );

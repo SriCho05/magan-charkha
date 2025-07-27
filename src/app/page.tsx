@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useProducts } from "@/providers/product-provider";
+import { useState, useMemo, useEffect } from "react";
 import ProductCard from "@/components/product-card";
 import {
   Select,
@@ -12,14 +11,43 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Product } from "@/lib/types";
+import { getProducts } from "@/lib/actions/product-actions";
+import { Skeleton } from "@/components/ui/skeleton";
+
+
+function ProductGridSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[...Array(6)].map((_, i) => (
+        <div key={i} className="space-y-2">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function Home() {
-  const { products } = useProducts();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     category: "all",
     color: "all",
   });
   const [sort, setSort] = useState("price-asc");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const fetchedProducts = await getProducts();
+      setProducts(fetchedProducts);
+      setLoading(false);
+    }
+    fetchProducts();
+  }, []);
 
   const handleFilterChange = (
     type: "category" | "color",
@@ -74,6 +102,7 @@ export default function Home() {
                   <Select
                     value={filters.category}
                     onValueChange={(value) => handleFilterChange("category", value)}
+                    disabled={loading}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
@@ -93,6 +122,7 @@ export default function Home() {
                     value={filters.color}
                     onValueChange={(value) => handleFilterChange("color", value)}
                     className="mt-2"
+                    disabled={loading}
                   >
                     {colors.map(c => (
                        <div key={c} className="flex items-center space-x-2">
@@ -106,7 +136,7 @@ export default function Home() {
             </div>
             <div>
               <h3 className="font-headline text-xl mb-4">Sort by</h3>
-              <Select value={sort} onValueChange={setSort}>
+              <Select value={sort} onValueChange={setSort} disabled={loading}>
                 <SelectTrigger>
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -120,7 +150,9 @@ export default function Home() {
         </aside>
 
         <section className="w-full md:w-3/4 lg:w-4/5">
-          {filteredAndSortedProducts.length > 0 ? (
+          {loading ? (
+            <ProductGridSkeleton />
+          ) : filteredAndSortedProducts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredAndSortedProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />

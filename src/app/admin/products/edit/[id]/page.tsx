@@ -1,12 +1,9 @@
-"use client";
-
 import ProductForm from "@/components/product-form";
-import { useProducts } from "@/providers/product-provider";
+import { getProductById } from "@/lib/actions/product-actions";
 import { notFound } from "next/navigation";
 
-export default function EditProductPage({ params }: { params: { id: string } }) {
-    const { products } = useProducts();
-    const product = products.find(p => p.id === params.id);
+export default async function EditProductPage({ params }: { params: { id: string } }) {
+    const product = await getProductById(params.id);
 
     if(!product) {
         return notFound();

@@ -1,6 +1,3 @@
-
-"use client";
-
 import {
   Table,
   TableBody,
@@ -13,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, PlusCircle, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useProducts } from "@/providers/product-provider";
 import Link from "next/link";
 import {
   AlertDialog,
@@ -26,17 +22,45 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
+import { getProducts, deleteProduct } from "@/lib/actions/product-actions";
+import { revalidatePath } from "next/cache";
 
-export default function AdminProductsPage() {
-    const { products, deleteProduct, loading } = useProducts();
-    const router = useRouter();
-
-  const handleDelete = async (productId: string) => {
-    await deleteProduct(productId);
-    // The state update in provider will trigger a re-render, no need for router.refresh()
+async function DeleteProductButton({ id }: { id: string }) {
+  const deleteProductWithId = async () => {
+    "use server"
+    await deleteProduct(id);
+    revalidatePath("/admin/products");
   }
+
+  return (
+     <AlertDialog>
+        <AlertDialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">Delete</span>
+        </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the product.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <form action={deleteProductWithId}>
+              <AlertDialogAction type="submit">Delete</AlertDialogAction>
+            </form>
+        </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+  )
+}
+
+
+export default async function AdminProductsPage() {
+  const products = await getProducts();
 
   return (
     <div>
@@ -62,18 +86,7 @@ export default function AdminProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-                [...Array(5)].map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell><Skeleton className="w-[50px] h-[50px] rounded-md" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-3/4" /></TableCell>
-                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-1/2" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-1/4" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-8 w-20" /></TableCell>
-                    </TableRow>
-                ))
-            ) : products.length > 0 ? (
+            {products.length > 0 ? (
                 products.map((product) => (
                 <TableRow key={product.id}>
                     <TableCell>
@@ -93,32 +106,13 @@ export default function AdminProductsPage() {
                     <TableCell>₹{product.price.toFixed(2)}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell className="text-right">
-                    <Button asChild variant="ghost" size="icon">
-                        <Link href={`/admin/products/edit/${product.id}`}>
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                        </Link>
-                    </Button>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                        </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the product.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(product.id)}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                      <Button asChild variant="ghost" size="icon">
+                          <Link href={`/admin/products/edit/${product.id}`}>
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                          </Link>
+                      </Button>
+                      <DeleteProductButton id={product.id} />
                     </TableCell>
                 </TableRow>
                 ))
