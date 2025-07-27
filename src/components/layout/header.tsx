@@ -2,9 +2,21 @@
 
 import Link from "next/link";
 import CartSheet from "@/components/cart-sheet";
-import { Leaf } from "lucide-react";
+import { Leaf, User } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
+  const { user, logout } = useAuth();
+
   return (
     <header className="bg-background/80 backdrop-blur-sm sticky top-0 z-40 border-b">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -12,22 +24,45 @@ export default function Header() {
           <Leaf className="w-6 h-6 text-primary" />
           <span className="font-headline text-2xl font-bold">Khadi Kraft</span>
         </Link>
-        <nav className="hidden md:flex gap-6">
-          <Link
-            href="/"
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            Home
-          </Link>
-          <Link
-            href="/admin"
-            className="text-sm font-medium transition-colors hover:text-primary"
-          >
-            Admin
-          </Link>
-        </nav>
-        <div>
-          <CartSheet />
+        <div className="flex items-center gap-4">
+            <nav className="hidden md:flex gap-6 items-center">
+            <Link
+                href="/"
+                className="text-sm font-medium transition-colors hover:text-primary"
+            >
+                Home
+            </Link>
+            <Link
+                href="/admin"
+                className="text-sm font-medium transition-colors hover:text-primary"
+            >
+                Admin
+            </Link>
+            </nav>
+            <div className="flex items-center gap-2">
+                {user ? (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full">
+                                <User className="h-5 w-5" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                                <Link href="/dashboard">Dashboard</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                ) : (
+                    <Button asChild variant="ghost" size="sm">
+                        <Link href="/login">Login</Link>
+                    </Button>
+                )}
+                <CartSheet />
+            </div>
         </div>
       </div>
     </header>
