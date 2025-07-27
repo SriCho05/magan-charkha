@@ -162,7 +162,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                     <FormControl>
                     <SelectTrigger>
                         <SelectValue placeholder="Select a color" />
-                    </Trigger>
+                    </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                         <SelectItem value="White">White</SelectItem>
