@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
@@ -19,8 +20,10 @@ export const CartContext = createContext<CartContextType | undefined>(undefined)
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
     try {
       const localData = localStorage.getItem('khadi_cart');
       if (localData) {
@@ -33,12 +36,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem('khadi_cart', JSON.stringify(cartItems));
-    } catch (error) {
-      console.error("Failed to save cart data to localStorage", error);
+    if (isMounted) {
+      try {
+        localStorage.setItem('khadi_cart', JSON.stringify(cartItems));
+      } catch (error) {
+        console.error("Failed to save cart data to localStorage", error);
+      }
     }
-  }, [cartItems]);
+  }, [cartItems, isMounted]);
 
   const addToCart = (product: Product, quantity: number) => {
     setCartItems(prevItems => {
@@ -86,6 +91,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);
   const cartTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal }}>

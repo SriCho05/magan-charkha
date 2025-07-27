@@ -39,9 +39,9 @@ export default function RootLayout({
         <AuthProvider>
             <ProductProvider>
                 <CartProvider>
-                    <div className="flex-grow">
-                    <Header />
-                    <main>{children}</main>
+                    <div className="flex-grow flex flex-col">
+                      <Header />
+                      <main className="flex-grow">{children}</main>
                     </div>
                     <Footer />
                     <Toaster />
