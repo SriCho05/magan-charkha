@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   SidebarProvider,
   Sidebar,
@@ -13,7 +13,13 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Leaf, Package, ShoppingBag, LayoutDashboard } from "lucide-react";
+import { Leaf, Package, ShoppingBag, LayoutDashboard, ShieldAlert } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useEffect } from "react";
+
+// For this example, we'll use a hardcoded admin email.
+// In a real application, you would manage roles in a database.
+const ADMIN_EMAIL = "admin@khadikraft.com";
 
 export default function AdminLayout({
   children,
@@ -21,6 +27,35 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+  
+  if (user.email !== ADMIN_EMAIL) {
+    return (
+         <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center">
+            <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
+            <h1 className="text-3xl font-headline font-bold">Unauthorized</h1>
+            <p className="text-muted-foreground mt-2">You do not have permission to view this page.</p>
+            <Button asChild onClick={() => router.push('/')} className="mt-6">
+                Go to Homepage
+            </Button>
+         </div>
+    )
+  }
 
   return (
     <SidebarProvider>

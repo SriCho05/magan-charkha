@@ -14,6 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+const ADMIN_EMAIL = "admin@khadikraft.com";
+
 export default function Header() {
   const { user, logout } = useAuth();
 
@@ -32,12 +34,6 @@ export default function Header() {
             >
                 Home
             </Link>
-            <Link
-                href="/admin"
-                className="text-sm font-medium transition-colors hover:text-primary"
-            >
-                Admin
-            </Link>
             </nav>
             <div className="flex items-center gap-2">
                 {user ? (
@@ -53,6 +49,12 @@ export default function Header() {
                             <DropdownMenuItem asChild>
                                 <Link href="/dashboard">Dashboard</Link>
                             </DropdownMenuItem>
+                            {user.email === ADMIN_EMAIL && (
+                                <DropdownMenuItem asChild>
+                                    <Link href="/admin">Admin Panel</Link>
+                                </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
