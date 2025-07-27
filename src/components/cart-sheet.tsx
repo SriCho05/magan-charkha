@@ -37,10 +37,19 @@ export default function CartSheet() {
         router.push("/login");
         return;
     }
+    
+    if (!user.email) {
+        toast({
+            title: "Email required",
+            description: "We could not find an email for your account. Please update your profile.",
+            variant: "destructive",
+        });
+        return;
+    }
 
     setIsCheckingOut(true);
     try {
-        await createOrder(cartItems, user.uid, user.email!);
+        await createOrder(cartItems, user.uid, user.email);
         toast({
             title: "Order Placed!",
             description: "Thank you for your purchase.",

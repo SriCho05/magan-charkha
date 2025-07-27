@@ -13,6 +13,9 @@ export async function createOrder(cartItems: CartItem[], userId: string, userEma
     if (!userId || cartItems.length === 0) {
         throw new Error("Cannot create an order with an empty cart or without a user.");
     }
+    if (!userEmail) {
+        throw new Error("User email is required to create an order.");
+    }
 
     const orderData = {
         userId: userId,
@@ -25,7 +28,7 @@ export async function createOrder(cartItems: CartItem[], userId: string, userEma
         })),
         total: cartItems.reduce((total, item) => total + (item.price * item.quantity), 0),
         status: "Pending" as const,
-        date: new Date().toISOString().split('T')[0], // format as YYYY-MM-DD
+        date: new Date().toISOString(),
     };
 
     try {
