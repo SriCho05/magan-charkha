@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { ShieldAlert } from "lucide-react";
 
 export default function AdminDashboard() {
   return (
