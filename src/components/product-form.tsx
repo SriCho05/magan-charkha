@@ -73,7 +73,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             toast({ title: "Product created successfully!" });
         }
         router.push("/admin/products");
-        router.refresh(); // Force a refresh to show the new product
+        router.refresh();
     } catch (error) {
         toast({ title: "An error occurred.", description: "Could not save the product. Please try again.", variant: "destructive" });
     } finally {
