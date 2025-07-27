@@ -62,13 +62,17 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
+        toast({ title: "Please login to checkout."});
         router.push("/login");
       } else if (cartItems.length === 0) {
         toast({ title: "Your cart is empty", description: "Please add items to your cart before checking out." });
         router.push("/");
+      } else {
+        // Pre-fill form with user's name if available
+        form.setValue("name", user.displayName || user.email?.split('@')[0] || '');
       }
     }
-  }, [user, authLoading, cartItems, router, toast]);
+  }, [user, authLoading, cartItems, router, toast, form]);
 
   const onSubmit = async (data: ShippingFormValues) => {
     if (!user || !user.email) {
@@ -82,20 +86,26 @@ export default function CheckoutPage() {
         const paymentResult = await processPayment();
         
         if (paymentResult.success) {
-            await createOrder(cartItems, user.uid, user.email, data);
+            await createOrder({
+                userId: user.uid, 
+                customer: data.name, 
+                shippingAddress: data,
+                items: cartItems
+            });
             clearCart();
             router.push('/order-status?status=success');
         } else {
             router.push('/order-status?status=failed');
         }
     } catch (error) {
+        console.error("Checkout error:", error)
         toast({ title: "An unexpected error occurred", description: "Please try again.", variant: "destructive" });
     } finally {
         setIsSubmitting(false);
     }
   };
 
-  if (authLoading || cartItems.length === 0) {
+  if (authLoading || cartItems.length === 0 || !user) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 

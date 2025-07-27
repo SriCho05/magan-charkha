@@ -5,16 +5,22 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
 import type { CartItem, Order, ShippingAddress } from '@/lib/types';
-import { products as initialProducts } from '@/lib/data';
 
 const ordersCollectionRef = collection(db, 'orders');
 
-export async function createOrder(cartItems: CartItem[], userId: string, userEmail: string, shippingAddress: ShippingAddress) {
-    if (!userId || cartItems.length === 0) {
+interface CreateOrderArgs {
+    userId: string;
+    customer: string;
+    shippingAddress: ShippingAddress;
+    items: CartItem[];
+}
+
+export async function createOrder({ userId, customer, shippingAddress, items }: CreateOrderArgs) {
+    if (!userId || items.length === 0) {
         throw new Error("Cannot create an order with an empty cart or without a user.");
     }
-    if (!userEmail) {
-        throw new Error("User email is required to create an order.");
+    if (!customer) {
+        throw new Error("Customer name is required to create an order.");
     }
     if(!shippingAddress) {
         throw new Error("Shipping address is required to create an order.");
@@ -22,14 +28,14 @@ export async function createOrder(cartItems: CartItem[], userId: string, userEma
 
     const orderData = {
         userId: userId,
-        customer: userEmail,
-        items: cartItems.map(item => ({
+        customer: customer,
+        items: items.map(item => ({
             productId: item.id,
             productName: item.name,
             quantity: item.quantity,
             price: item.price,
         })),
-        total: cartItems.reduce((total, item) => total + (item.price * item.quantity), 0),
+        total: items.reduce((total, item) => total + (item.price * item.quantity), 0),
         status: "Pending" as const,
         date: new Date().toISOString(),
         shippingAddress: shippingAddress,
