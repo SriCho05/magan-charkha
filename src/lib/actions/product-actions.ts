@@ -3,34 +3,42 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, writeBatch, query } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { products as initialProducts } from '@/lib/data';
 
 const productsCollection = collection(db, 'products');
 
-// Function to seed initial data if the collection is empty
 export async function seedInitialProducts() {
-  const querySnapshot = await getDocs(productsCollection);
-  if (querySnapshot.empty && initialProducts.length > 0) {
+  const q = query(collection(db, "products"));
+  const querySnapshot = await getDocs(q);
+
+  if (querySnapshot.empty) {
     console.log("Seeding initial products...");
     const batch = writeBatch(db);
     initialProducts.forEach((product) => {
-      // Use the predefined ID from the data file for seeding
       const docRef = doc(productsCollection, product.id);
       batch.set(docRef, product);
     });
     await batch.commit();
     console.log("Initial products seeded successfully.");
+    revalidatePath("/admin/products");
+  } else {
+    console.log("Products collection is not empty. Skipping seed.");
   }
 }
 
-// Ensure seeding is attempted at least once.
-seedInitialProducts().catch(console.error);
+// Call this once, perhaps in a startup script or a special admin action if needed.
+// For this context, we will not call it automatically to avoid re-seeding issues.
 
 export async function getProducts(): Promise<Product[]> {
     try {
         const querySnapshot = await getDocs(productsCollection);
+        if (querySnapshot.empty) {
+            await seedInitialProducts();
+            const refreshedSnapshot = await getDocs(productsCollection);
+            return refreshedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        }
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
     } catch (error) {
         console.error("Error fetching products: ", error);

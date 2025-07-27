@@ -1,9 +1,8 @@
 
 import { initializeApp, getApps, getApp, FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore, initializeFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
 const firebaseConfig: FirebaseOptions = {
   projectId: "khadi-kraft",
   appId: "1:939770024402:web:6420144252931b1682b80b",
@@ -13,12 +12,8 @@ const firebaseConfig: FirebaseOptions = {
   messagingSenderId: "939770024402"
 };
 
-// Initialize Firebase
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-
-// Initialize Firestore
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
-
 const auth = getAuth(app);
 
-export { app, auth, db };
+export { app, db, auth };
