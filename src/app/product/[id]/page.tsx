@@ -16,7 +16,7 @@ function ProductPageContent({ product }: { product: Product }) {
   const { addToCart } = useCart();
 
   return (
-    <>
+    <div className="container mx-auto px-4 py-12">
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         <div className="animate-fade-in">
           <Image
@@ -62,7 +62,7 @@ function ProductPageContent({ product }: { product: Product }) {
       <div className="mt-16">
         <ProductSuggestions productDescription={product.description} />
       </div>
-    </>
+    </div>
   );
 }
 
@@ -98,8 +98,6 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
       <ProductPageContent product={product} />
-    </div>
   );
 }
