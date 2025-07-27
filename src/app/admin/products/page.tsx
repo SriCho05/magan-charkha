@@ -35,7 +35,7 @@ export default function AdminProductsPage() {
 
   const handleDelete = async (productId: string) => {
     await deleteProduct(productId);
-    router.refresh();
+    // The state update in provider will trigger a re-render, no need for router.refresh()
   }
 
   return (
