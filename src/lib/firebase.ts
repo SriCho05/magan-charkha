@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
   projectId: "khadi-kraft",
   appId: "1:939770024402:web:6420144252931b1682b80b",
@@ -11,7 +12,8 @@ const firebaseConfig = {
   messagingSenderId: "939770024402",
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Initialize Firebase
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
 export { app, auth };
