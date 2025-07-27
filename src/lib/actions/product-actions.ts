@@ -25,9 +25,10 @@ async function seedInitialProducts() {
   }
 }
 
+// Call seeding once at the start, not in every getProducts call.
+seedInitialProducts();
 
 export async function getProducts(): Promise<Product[]> {
-  await seedInitialProducts(); // Ensure data is seeded if needed
   try {
     const querySnapshot = await getDocs(productsCollection);
     const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -64,7 +65,6 @@ export async function addProduct(productData: Omit<Product, 'id'>) {
   try {
     const docRef = await addDoc(productsCollection, productData);
     revalidatePath("/admin/products");
-    revalidatePath("/");
     return { id: docRef.id, ...productData };
   } catch (error) {
     console.error("Error adding product: ", error);
@@ -80,7 +80,6 @@ export async function updateProduct(product: Product) {
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/edit/${id}`);
     revalidatePath(`/product/${id}`);
-    revalidatePath("/");
   } catch (error) {
     console.error("Error updating product: ", error);
     throw new Error("Could not update product.");
@@ -91,7 +90,6 @@ export async function deleteProduct(productId: string) {
   try {
     await deleteDoc(doc(db, 'products', productId));
     revalidatePath("/admin/products");
-    revalidatePath("/");
   } catch (error) {
     console.error("Error deleting product: ", error);
     throw new Error("Could not delete product.");
