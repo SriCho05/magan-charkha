@@ -4,14 +4,13 @@
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState }from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { createOrder } from "@/lib/actions/order-actions";
@@ -28,6 +27,18 @@ const shippingSchema = z.object({
 });
 
 type ShippingFormValues = z.infer<typeof shippingSchema>;
+
+// Dummy function to simulate payment processing
+const processPayment = async (): Promise<{ success: boolean }> => {
+    console.log("Processing payment...");
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate random success/failure
+    const isSuccess = Math.random() > 0.2; // 80% success rate
+    console.log(`Payment ${isSuccess ? 'successful' : 'failed'}`);
+    return { success: isSuccess };
+};
+
 
 export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth();
@@ -66,16 +77,19 @@ export default function CheckoutPage() {
     }
     
     setIsSubmitting(true);
+    
     try {
-        await createOrder(cartItems, user.uid, user.email, data);
-        toast({
-            title: "Order Placed!",
-            description: "Thank you for your purchase.",
-        });
-        clearCart();
-        router.push("/dashboard");
+        const paymentResult = await processPayment();
+        
+        if (paymentResult.success) {
+            await createOrder(cartItems, user.uid, user.email, data);
+            clearCart();
+            router.push('/order-status?status=success');
+        } else {
+            router.push('/order-status?status=failed');
+        }
     } catch (error) {
-        toast({ title: "Order Failed", description: "There was an issue placing your order.", variant: "destructive" });
+        toast({ title: "An unexpected error occurred", description: "Please try again.", variant: "destructive" });
     } finally {
         setIsSubmitting(false);
     }
@@ -180,7 +194,7 @@ export default function CheckoutPage() {
                     />
                   </div>
                   <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
-                    {isSubmitting ? "Placing Order..." : `Place Order (₹${cartTotal.toFixed(2)})`}
+                    {isSubmitting ? "Processing Payment..." : `Pay ₹${cartTotal.toFixed(2)}`}
                   </Button>
                 </form>
               </Form>
