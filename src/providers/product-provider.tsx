@@ -7,6 +7,7 @@ import { products as initialProducts } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ProductContextType {
   products: Product[];
@@ -21,6 +22,7 @@ export const ProductContext = createContext<ProductContextType | undefined>(unde
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -56,8 +58,10 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    fetchProducts();
-  }, [toast]);
+    if (!authLoading) {
+        fetchProducts();
+    }
+  }, [authLoading, toast]);
 
   const addProduct = async (productData: Omit<Product, 'id'>) => {
     try {
