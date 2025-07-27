@@ -87,6 +87,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const clearCart = () => {
     setCartItems([]);
+    try {
+        localStorage.removeItem('khadi_cart');
+    } catch (error) {
+        console.error("Failed to clear cart data from localStorage", error);
+    }
   };
 
   const cartCount = cartItems.reduce((count, item) => count + item.quantity, 0);

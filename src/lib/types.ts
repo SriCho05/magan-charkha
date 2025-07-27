@@ -11,6 +11,7 @@ export interface Product {
 
 export interface Order {
   id: string;
+  userId: string;
   customer: string;
   items: {
     productId: string;

@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -13,9 +14,49 @@ import { useCart } from "@/hooks/use-cart";
 import { ShoppingCart, Plus, Minus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { ScrollArea } from "./ui/scroll-area";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { createOrder } from "@/lib/actions/order-actions";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CartSheet() {
-  const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const router = useRouter();
+
+  const handleCheckout = async () => {
+    if (!user) {
+        toast({
+            title: "Authentication required",
+            description: "Please log in to proceed to checkout.",
+            variant: "destructive",
+        });
+        router.push("/login");
+        return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+        await createOrder(cartItems, user.uid, user.email!);
+        toast({
+            title: "Order Placed!",
+            description: "Thank you for your purchase.",
+        });
+        clearCart();
+    } catch (error) {
+        toast({
+            title: "Checkout Failed",
+            description: "There was an issue placing your order. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsCheckingOut(false);
+    }
+  }
+
 
   return (
     <Sheet>
@@ -89,8 +130,8 @@ export default function CartSheet() {
                   <span>Subtotal</span>
                   <span>₹{cartTotal.toFixed(2)}</span>
                 </div>
-                <Button className="w-full" size="lg">
-                  Proceed to Checkout
+                <Button className="w-full" size="lg" onClick={handleCheckout} disabled={isCheckingOut}>
+                  {isCheckingOut ? "Placing Order..." : "Proceed to Checkout"}
                 </Button>
               </div>
             </SheetFooter>
