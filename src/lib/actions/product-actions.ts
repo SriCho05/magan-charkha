@@ -3,7 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, writeBatch, query } from 'firebase/firestore';
+import { collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, writeBatch, query, setDoc } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { products as initialProducts } from '@/lib/data';
 
@@ -60,10 +60,10 @@ export async function getProductById(id: string): Promise<Product | null> {
 // The data coming from the form won't have an ID.
 export async function addProduct(productData: Omit<Product, 'id'>) {
   try {
-    // Firestore will auto-generate an ID
-    const docRef = await addDoc(productsCollection, productData);
+    const newDocRef = doc(productsCollection);
+    await setDoc(newDocRef, productData);
     revalidatePath("/admin/products");
-    return { id: docRef.id, ...productData };
+    return { id: newDocRef.id, ...productData };
   } catch (error) {
     console.error("Error adding product: ", error);
     throw new Error("Could not add product.");
