@@ -17,19 +17,16 @@ export async function seedInitialProducts() {
     console.log("Seeding initial products...");
     const batch = writeBatch(db);
     initialProducts.forEach((product) => {
+      // Use the product's string ID when creating the document reference
       const docRef = doc(productsCollection, product.id);
       batch.set(docRef, product);
     });
     await batch.commit();
     console.log("Initial products seeded successfully.");
+    revalidatePath("/");
     revalidatePath("/admin/products");
-  } else {
-    console.log("Products collection is not empty. Skipping seed.");
   }
 }
-
-// Call this once, perhaps in a startup script or a special admin action if needed.
-// For this context, we will not call it automatically to avoid re-seeding issues.
 
 export async function getProducts(): Promise<Product[]> {
     try {
@@ -60,8 +57,10 @@ export async function getProductById(id: string): Promise<Product | null> {
     }
 }
 
+// The data coming from the form won't have an ID.
 export async function addProduct(productData: Omit<Product, 'id'>) {
   try {
+    // Firestore will auto-generate an ID
     const docRef = await addDoc(productsCollection, productData);
     revalidatePath("/admin/products");
     return { id: docRef.id, ...productData };
@@ -74,6 +73,7 @@ export async function addProduct(productData: Omit<Product, 'id'>) {
 export async function updateProduct(product: Product) {
   try {
     const productDoc = doc(db, 'products', product.id);
+    // Destructure the id out, and pass the rest of the data to be updated.
     const { id, ...productData } = product;
     await updateDoc(productDoc, productData);
     revalidatePath("/admin/products");

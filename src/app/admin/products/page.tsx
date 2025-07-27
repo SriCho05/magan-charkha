@@ -1,4 +1,6 @@
 
+"use server";
+
 import {
   Table,
   TableBody,
@@ -27,10 +29,11 @@ import { getProducts, deleteProduct } from "@/lib/actions/product-actions";
 import { revalidatePath } from "next/cache";
 
 async function DeleteProductButton({ id }: { id: string }) {
+  // This needs to be a server action
   const deleteProductWithId = async () => {
     "use server"
     await deleteProduct(id);
-    revalidatePath("/admin/products");
+    // No need to revalidate here as the form submission will trigger a page refresh.
   }
 
   return (
@@ -49,10 +52,10 @@ async function DeleteProductButton({ id }: { id: string }) {
             </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
+          <form action={deleteProductWithId} className="flex gap-2">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <form action={deleteProductWithId}>
-              <AlertDialogAction type="submit">Delete</AlertDialogAction>
-            </form>
+            <AlertDialogAction type="submit">Delete</AlertDialogAction>
+          </form>
         </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>

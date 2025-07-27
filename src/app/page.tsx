@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -20,10 +21,12 @@ function ProductGridSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {[...Array(6)].map((_, i) => (
-        <div key={i} className="space-y-2">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-4 w-1/2" />
+        <div key={i} className="space-y-4">
+          <Skeleton className="h-64 w-full rounded-lg" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
         </div>
       ))}
     </div>
@@ -69,7 +72,7 @@ export default function Home() {
 
     const [sortKey, sortDirection] = sort.split("-");
 
-    return filtered.sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       if (sortKey === "price") {
         return sortDirection === "asc" ? a.price - b.price : b.price - a.price;
       }
@@ -77,8 +80,9 @@ export default function Home() {
     });
   }, [products, filters, sort]);
 
-  const categories = ["all", ...Array.from(new Set(products.map(p => p.category)))];
-  const colors = ["all", ...Array.from(new Set(products.map(p => p.color)))];
+  const categories = useMemo(() => ["all", ...Array.from(new Set(products.map(p => p.category)))], [products]);
+  const colors = useMemo(() => ["all", ...Array.from(new Set(products.map(p => p.color ?? ''))).filter(Boolean)], [products]);
+
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -93,7 +97,7 @@ export default function Home() {
 
       <div className="flex flex-col md:flex-row gap-8">
         <aside className="w-full md:w-1/4 lg:w-1/5">
-          <div className="space-y-6">
+          <div className="space-y-6 sticky top-24">
             <div>
               <h3 className="font-headline text-xl mb-4">Filters</h3>
               <div className="space-y-4">
@@ -159,7 +163,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-             <div className="flex flex-col items-center justify-center h-full text-center bg-card p-8 rounded-lg shadow-sm">
+             <div className="flex flex-col items-center justify-center h-full min-h-[40vh] text-center bg-card p-8 rounded-lg shadow-sm">
                 <p className="font-headline text-2xl">No Products Found</p>
                 <p className="text-muted-foreground mt-2">Try adjusting your filters.</p>
              </div>

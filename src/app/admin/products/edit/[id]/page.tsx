@@ -1,3 +1,5 @@
+
+'use server';
 import ProductForm from "@/components/product-form";
 import { getProductById } from "@/lib/actions/product-actions";
 import { notFound } from "next/navigation";
