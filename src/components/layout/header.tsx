@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const ADMIN_EMAIL = "admin@khadikraft.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@khadikraft.com";
 
 export default function Header() {
   const { user, logout } = useAuth();
