@@ -3,11 +3,13 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/firebase";
+import { adminDb } from "@/lib/firebase-admin";
 import { collection, getDocs, getDoc, doc, writeBatch, setDoc, updateDoc, deleteDoc, query } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { products as initialProducts } from '@/lib/data';
 
-const productsCollection = collection(db, 'products');
+const productsCollectionRef = collection(db, 'products');
+const productsAdminCollectionRef = adminDb.collection('products');
 
 export async function seedInitialProducts() {
   const q = query(collection(db, "products"));
@@ -18,7 +20,7 @@ export async function seedInitialProducts() {
     const batch = writeBatch(db);
     initialProducts.forEach((product) => {
       // Use the product's string ID when creating the document reference
-      const docRef = doc(productsCollection, product.id);
+      const docRef = doc(productsCollectionRef, product.id);
       batch.set(docRef, product);
     });
     await batch.commit();
@@ -30,10 +32,10 @@ export async function seedInitialProducts() {
 
 export async function getProducts(): Promise<Product[]> {
     try {
-        const querySnapshot = await getDocs(productsCollection);
+        const querySnapshot = await getDocs(productsCollectionRef);
         if (querySnapshot.empty) {
             await seedInitialProducts();
-            const refreshedSnapshot = await getDocs(productsCollection);
+            const refreshedSnapshot = await getDocs(productsCollectionRef);
             return refreshedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         }
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -60,18 +62,14 @@ export async function getProductById(id: string): Promise<Product | null> {
 // The data coming from the form won't have an ID.
 export async function addProduct(productData: Omit<Product, 'id'>) {
   try {
-    // Create a new document reference with a unique ID
-    const newProductRef = doc(productsCollection);
-    // Now use setDoc to create the document with the new ID
-    await setDoc(newProductRef, productData);
+    const newDocRef = productsAdminCollectionRef.doc();
+    await newDocRef.set(productData);
     
     revalidatePath("/admin/products");
     
-    // Return the new product with its generated ID
-    return { id: newProductRef.id, ...productData };
+    return { id: newDocRef.id, ...productData };
   } catch (error) {
     console.error("Error adding product: ", error);
-    // It's good practice to throw the error to be handled by the caller
     throw new Error("Could not add product.");
   }
 }
@@ -79,10 +77,9 @@ export async function addProduct(productData: Omit<Product, 'id'>) {
 
 export async function updateProduct(product: Product) {
   try {
-    const productDoc = doc(db, 'products', product.id);
-    // Destructure the id out, and pass the rest of the data to be updated.
     const { id, ...productData } = product;
-    await updateDoc(productDoc, productData);
+    await productsAdminCollectionRef.doc(id).update(productData);
+
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/edit/${id}`);
     revalidatePath(`/product/${id}`);
@@ -94,7 +91,7 @@ export async function updateProduct(product: Product) {
 
 export async function deleteProduct(productId: string) {
   try {
-    await deleteDoc(doc(db, 'products', productId));
+    await productsAdminCollectionRef.doc(productId).delete();
     revalidatePath("/admin/products");
   } catch (error) {
     console.error("Error deleting product: ", error);
