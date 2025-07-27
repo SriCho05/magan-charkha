@@ -62,8 +62,8 @@ export async function getProductById(id: string): Promise<Product | null> {
 // The data coming from the form won't have an ID.
 export async function addProduct(productData: Omit<Product, 'id'>) {
   try {
-    const newDocRef = productsAdminCollectionRef.doc();
-    await newDocRef.set(productData);
+    // Use the adminDb instance for this server-side write operation
+    const newDocRef = await productsAdminCollectionRef.add(productData);
     
     revalidatePath("/admin/products");
     
@@ -78,6 +78,7 @@ export async function addProduct(productData: Omit<Product, 'id'>) {
 export async function updateProduct(product: Product) {
   try {
     const { id, ...productData } = product;
+    // Use the adminDb instance for this server-side write operation
     await productsAdminCollectionRef.doc(id).update(productData);
 
     revalidatePath("/admin/products");
@@ -91,6 +92,7 @@ export async function updateProduct(product: Product) {
 
 export async function deleteProduct(productId: string) {
   try {
+    // Use the adminDb instance for this server-side write operation
     await productsAdminCollectionRef.doc(productId).delete();
     revalidatePath("/admin/products");
   } catch (error) {
