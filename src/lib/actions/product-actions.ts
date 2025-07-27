@@ -10,37 +10,32 @@ import { products as initialProducts } from '@/lib/data';
 const productsCollection = collection(db, 'products');
 
 // Function to seed initial data if the collection is empty
-async function seedInitialProducts() {
-  try {
-    const querySnapshot = await getDocs(productsCollection);
-    if (querySnapshot.empty && initialProducts.length > 0) {
-      console.log("Seeding initial products...");
-      const batch = writeBatch(db);
-      initialProducts.forEach((product) => {
-        // Use the predefined ID from the data file for seeding
-        const docRef = doc(productsCollection, product.id);
-        batch.set(docRef, product);
-      });
-      await batch.commit();
-      console.log("Initial products seeded successfully.");
-    }
-  } catch (error) {
-    console.error("Error seeding initial products:", error)
+export async function seedInitialProducts() {
+  const querySnapshot = await getDocs(productsCollection);
+  if (querySnapshot.empty && initialProducts.length > 0) {
+    console.log("Seeding initial products...");
+    const batch = writeBatch(db);
+    initialProducts.forEach((product) => {
+      // Use the predefined ID from the data file for seeding
+      const docRef = doc(productsCollection, product.id);
+      batch.set(docRef, product);
+    });
+    await batch.commit();
+    console.log("Initial products seeded successfully.");
   }
 }
 
-// Call seeding once at the start.
-seedInitialProducts();
+// Ensure seeding is attempted at least once.
+seedInitialProducts().catch(console.error);
 
 export async function getProducts(): Promise<Product[]> {
-  try {
-    const querySnapshot = await getDocs(productsCollection);
-    const products = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-    return products;
-  } catch (error) {
-    console.error("Error fetching products: ", error);
-    return [];
-  }
+    try {
+        const querySnapshot = await getDocs(productsCollection);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    } catch (error) {
+        console.error("Error fetching products: ", error);
+        return [];
+    }
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
@@ -53,15 +48,7 @@ export async function getProductById(id: string): Promise<Product | null> {
         return null;
     } catch (error) {
         console.error("Error fetching product by ID:", error);
-        // Fallback for environments where single doc fetch might fail
-        try {
-            const products = await getProducts();
-            const product = products.find(p => p.id === id) || null;
-            return product;
-        } catch (fallbackError) {
-             console.error("Fallback fetching failed:", fallbackError);
-             return null;
-        }
+        return null;
     }
 }
 

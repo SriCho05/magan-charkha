@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -72,6 +73,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
             toast({ title: "Product created successfully!" });
         }
         router.push("/admin/products");
+        router.refresh(); // Force a refresh to show the new product
     } catch (error) {
         toast({ title: "An error occurred.", description: "Could not save the product. Please try again.", variant: "destructive" });
     } finally {
@@ -160,7 +162,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                     <FormControl>
                     <SelectTrigger>
                         <SelectValue placeholder="Select a color" />
-                    </SelectTrigger>
+                    </Trigger>
                     </FormControl>
                     <SelectContent>
                         <SelectItem value="White">White</SelectItem>

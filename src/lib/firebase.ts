@@ -1,10 +1,10 @@
 
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, FirebaseOptions } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, initializeFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
+const firebaseConfig: FirebaseOptions = {
   projectId: "khadi-kraft",
   appId: "1:939770024402:web:6420144252931b1682b80b",
   storageBucket: "khadi-kraft.firebasestorage.app",
@@ -15,7 +15,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
+
+// Initialize Firestore
 const db = getFirestore(app);
+
+const auth = getAuth(app);
 
 export { app, auth, db };
