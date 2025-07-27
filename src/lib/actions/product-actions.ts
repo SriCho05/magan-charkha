@@ -38,17 +38,17 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  try {
-    const productDoc = doc(db, 'products', id);
-    const docSnap = await getDoc(productDoc);
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() } as Product;
+    if (!id) return null;
+    try {
+        const productDoc = await getDoc(doc(db, 'products', id));
+        if (!productDoc.exists()) {
+            return null;
+        }
+        return { id: productDoc.id, ...productDoc.data() } as Product;
+    } catch (error) {
+        console.error("Error fetching product by ID:", error);
+        return null;
     }
-    return null;
-  } catch (error) {
-    console.error("Error fetching product by ID: ", error);
-    return null;
-  }
 }
 
 export async function addProduct(productData: Omit<Product, 'id'>) {
