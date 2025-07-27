@@ -1,3 +1,4 @@
+
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -40,11 +41,9 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductById(id: string): Promise<Product | null> {
     if (!id) return null;
     try {
-        const productDoc = await getDoc(doc(db, 'products', id));
-        if (!productDoc.exists()) {
-            return null;
-        }
-        return { id: productDoc.id, ...productDoc.data() } as Product;
+        const products = await getProducts();
+        const product = products.find(p => p.id === id) || null;
+        return product;
     } catch (error) {
         console.error("Error fetching product by ID:", error);
         return null;
