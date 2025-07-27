@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -18,9 +19,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
-// For this example, we'll use a hardcoded admin email.
-// In a real application, you would manage roles in a database.
-const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@khadikraft.com";
+// This is now controlled by the environment variable
+const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
 export default function AdminLayout({
   children,
@@ -113,13 +113,13 @@ export default function AdminLayout({
 
   // If we are done loading and the user is not the admin, show unauthorized.
   return (
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center">
-            <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
-            <h1 className="text-3xl font-headline font-bold">Unauthorized</h1>
-            <p className="text-muted-foreground mt-2">You do not have permission to view this page.</p>
-            <Button asChild className="mt-6">
-                <Link href="/">Go to Homepage</Link>
-            </Button>
-        </div>
-    );
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center">
+        <ShieldAlert className="w-16 h-16 text-destructive mb-4" />
+        <h1 className="text-3xl font-headline font-bold">Unauthorized</h1>
+        <p className="text-muted-foreground mt-2">You do not have permission to view this page.</p>
+        <Button asChild className="mt-6">
+            <Link href="/">Go to Homepage</Link>
+        </Button>
+    </div>
+  );
 }
