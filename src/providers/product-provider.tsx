@@ -30,16 +30,16 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         const productsCollection = collection(db, 'products');
         const querySnapshot = await getDocs(productsCollection);
         
-        // Seed database if it's empty
         if (querySnapshot.empty && initialProducts.length > 0) {
           const batch = writeBatch(db);
           initialProducts.forEach((product) => {
-            // Firestore can auto-generate IDs if you don't specify one
             const docRef = doc(productsCollection, product.id);
             batch.set(docRef, product);
           });
           await batch.commit();
-          setProducts(initialProducts);
+          const seededProducts = await getDocs(productsCollection);
+          const productsData = seededProducts.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+          setProducts(productsData);
         } else {
           const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
           setProducts(productsData);
@@ -72,6 +72,7 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
             description: "Could not add product.",
             variant: "destructive",
         });
+        throw error;
     }
   };
 
