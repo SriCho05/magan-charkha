@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -7,6 +8,15 @@ export interface Product {
   color: "Green" | "Beige" | "Brown" | "White" | "Black";
   image: string;
   stock: number;
+}
+
+export interface ShippingAddress {
+    name: string;
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    phone: string;
 }
 
 export interface Order {
@@ -22,6 +32,7 @@ export interface Order {
   total: number;
   status: "Pending" | "Shipped" | "Delivered";
   date: string;
+  shippingAddress: ShippingAddress;
 }
 
 export interface CartItem {
