@@ -25,9 +25,50 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AdminProductsPage() {
-    const { products, deleteProduct } = useProducts();
+    const { products, deleteProduct, loading } = useProducts();
+
+  if (loading) {
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-headline font-bold">Products</h1>
+                <Button disabled>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Product
+                </Button>
+            </div>
+            <div className="rounded-lg border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[80px]">Image</TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Category</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead>Stock</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {[...Array(5)].map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell><Skeleton className="w-[50px] h-[50px] rounded-md" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-3/4" /></TableCell>
+                                <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-1/2" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-1/4" /></TableCell>
+                                <TableCell className="text-right"><Skeleton className="h-8 w-20" /></TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    )
+  }
 
   return (
     <div>

@@ -31,10 +31,11 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         const querySnapshot = await getDocs(productsCollection);
         
         // Seed database if it's empty
-        if (querySnapshot.empty) {
+        if (querySnapshot.empty && initialProducts.length > 0) {
           const batch = writeBatch(db);
           initialProducts.forEach((product) => {
-            const docRef = doc(db, 'products', product.id);
+            // Firestore can auto-generate IDs if you don't specify one
+            const docRef = doc(productsCollection, product.id);
             batch.set(docRef, product);
           });
           await batch.commit();
@@ -62,8 +63,8 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
     try {
       const productsCollection = collection(db, 'products');
       const docRef = await addDoc(productsCollection, productData);
-      const newProduct = { id: docRef.id, ...productData };
-      setProducts(prevProducts => [...prevProducts, newProduct as Product]);
+      const newProduct: Product = { id: docRef.id, ...(productData as Omit<Product, 'id' | 'price' | 'stock'>), price: productData.price, stock: productData.stock };
+      setProducts(prevProducts => [...prevProducts, newProduct]);
     } catch (error) {
         console.error("Error adding product: ", error);
         toast({
@@ -99,7 +100,6 @@ export const ProductProvider = ({ children }: { children: ReactNode }) => {
         toast({
             title: "Product deleted",
             description: "The product has been successfully removed.",
-            variant: "destructive"
         });
     } catch (error) {
         console.error("Error deleting product: ", error);
