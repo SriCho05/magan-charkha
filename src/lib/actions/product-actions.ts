@@ -41,20 +41,31 @@ export async function getProducts(): Promise<Product[]> {
 export async function getProductById(id: string): Promise<Product | null> {
     if (!id) return null;
     try {
-        const products = await getProducts();
-        const product = products.find(p => p.id === id) || null;
-        return product;
+        const productDoc = await getDoc(doc(db, 'products', id));
+        if (productDoc.exists()) {
+            return { id: productDoc.id, ...productDoc.data() } as Product;
+        }
+        return null;
     } catch (error) {
         console.error("Error fetching product by ID:", error);
-        return null;
+        // Fallback for environments where single doc fetch might fail
+        try {
+            const products = await getProducts();
+            const product = products.find(p => p.id === id) || null;
+            return product;
+        } catch (fallbackError) {
+             console.error("Fallback fetching failed:", fallbackError);
+             return null;
+        }
     }
 }
 
 export async function addProduct(productData: Omit<Product, 'id'>) {
   try {
-    await addDoc(productsCollection, productData);
+    const docRef = await addDoc(productsCollection, productData);
     revalidatePath("/admin/products");
     revalidatePath("/");
+    return { id: docRef.id, ...productData };
   } catch (error) {
     console.error("Error adding product: ", error);
     throw new Error("Could not add product.");
