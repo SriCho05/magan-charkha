@@ -11,21 +11,25 @@ const productsCollection = collection(db, 'products');
 
 // Function to seed initial data if the collection is empty
 async function seedInitialProducts() {
-  const querySnapshot = await getDocs(productsCollection);
-  if (querySnapshot.empty && initialProducts.length > 0) {
-    console.log("Seeding initial products...");
-    const batch = writeBatch(db);
-    initialProducts.forEach((product) => {
-      // Use the predefined ID from the data file for seeding
-      const docRef = doc(productsCollection, product.id);
-      batch.set(docRef, product);
-    });
-    await batch.commit();
-    console.log("Initial products seeded successfully.");
+  try {
+    const querySnapshot = await getDocs(productsCollection);
+    if (querySnapshot.empty && initialProducts.length > 0) {
+      console.log("Seeding initial products...");
+      const batch = writeBatch(db);
+      initialProducts.forEach((product) => {
+        // Use the predefined ID from the data file for seeding
+        const docRef = doc(productsCollection, product.id);
+        batch.set(docRef, product);
+      });
+      await batch.commit();
+      console.log("Initial products seeded successfully.");
+    }
+  } catch (error) {
+    console.error("Error seeding initial products:", error)
   }
 }
 
-// Call seeding once at the start, not in every getProducts call.
+// Call seeding once at the start.
 seedInitialProducts();
 
 export async function getProducts(): Promise<Product[]> {
