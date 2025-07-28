@@ -35,6 +35,12 @@ export default function Header() {
             >
                 Home
             </Link>
+             <Link
+                href="/shop"
+                className="text-sm font-medium transition-colors hover:text-primary"
+            >
+                Shop
+            </Link>
             </nav>
             <div className="flex items-center gap-2">
                 {user ? (

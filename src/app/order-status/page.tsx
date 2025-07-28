@@ -23,7 +23,7 @@ function StatusContent() {
                         <Link href="/dashboard">View Order History</Link>
                     </Button>
                     <Button asChild variant="outline">
-                        <Link href="/">Continue Shopping</Link>
+                        <Link href="/shop">Continue Shopping</Link>
                     </Button>
                 </div>
             </div>
