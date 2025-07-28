@@ -7,6 +7,7 @@ import Link from "next/link";
 import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/actions/product-actions";
 import type { Product } from "@/lib/types";
+import ScrollAnimation from "@/components/scroll-animation";
 
 
 async function FeaturedProducts() {
@@ -20,8 +21,10 @@ async function FeaturedProducts() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {featured.map((product: Product) => (
-        <ProductCard key={product.id} product={product} />
+      {featured.map((product: Product, index: number) => (
+        <ScrollAnimation key={product.id} delay={index * 150}>
+            <ProductCard product={product} />
+        </ScrollAnimation>
       ))}
     </div>
   )
@@ -36,21 +39,27 @@ export default function LandingPage() {
            <Image
             src="https://placehold.co/1600x900.png"
             alt="Khadi fabric texture"
-            layout="fill"
-            objectFit="cover"
-            className="opacity-20"
+            fill
+            className="opacity-20 object-cover"
             data-ai-hint="fabric texture"
+            priority
           />
           <div className="container px-4 z-10">
-            <h1 className="font-headline text-5xl md:text-7xl font-bold mb-4">
-              The Fabric of Freedom
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Experience the timeless elegance of authentic Khadi, handcrafted with passion and woven with tradition.
-            </p>
-            <Button asChild size="lg">
-              <Link href="/shop">Explore the Collection</Link>
-            </Button>
+            <ScrollAnimation>
+                <h1 className="font-headline text-5xl md:text-7xl font-bold mb-4">
+                The Fabric of Freedom
+                </h1>
+            </ScrollAnimation>
+            <ScrollAnimation delay={200}>
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                Experience the timeless elegance of authentic Khadi, handcrafted with passion and woven with tradition.
+                </p>
+            </ScrollAnimation>
+            <ScrollAnimation delay={400}>
+                <Button asChild size="lg">
+                <Link href="/shop">Explore the Collection</Link>
+                </Button>
+            </ScrollAnimation>
           </div>
         </section>
 
@@ -58,33 +67,39 @@ export default function LandingPage() {
         <section className="py-16 bg-background">
           <div className="container px-4">
             <div className="grid md:grid-cols-3 gap-12 text-center">
-              <div className="flex flex-col items-center">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-                  <Hand className="w-8 h-8" />
+              <ScrollAnimation>
+                <div className="flex flex-col items-center">
+                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+                    <Hand className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-headline text-2xl font-semibold mb-2">Handcrafted Tradition</h3>
+                    <p className="text-muted-foreground">
+                    Each thread is spun by hand, weaving stories of heritage and skill into every garment.
+                    </p>
                 </div>
-                <h3 className="font-headline text-2xl font-semibold mb-2">Handcrafted Tradition</h3>
-                <p className="text-muted-foreground">
-                  Each thread is spun by hand, weaving stories of heritage and skill into every garment.
-                </p>
-              </div>
-              <div className="flex flex-col items-center">
-                 <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-                  <Leaf className="w-8 h-8" />
+              </ScrollAnimation>
+              <ScrollAnimation delay={200}>
+                <div className="flex flex-col items-center">
+                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+                    <Leaf className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-headline text-2xl font-semibold mb-2">Sustainable Fabrics</h3>
+                    <p className="text-muted-foreground">
+                    Embrace eco-friendly fashion with our all-natural, breathable Khadi material.
+                    </p>
                 </div>
-                <h3 className="font-headline text-2xl font-semibold mb-2">Sustainable Fabrics</h3>
-                <p className="text-muted-foreground">
-                  Embrace eco-friendly fashion with our all-natural, breathable Khadi material.
-                </p>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-                   <Sun className="w-8 h-8" />
+              </ScrollAnimation>
+              <ScrollAnimation delay={400}>
+                <div className="flex flex-col items-center">
+                    <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
+                    <Sun className="w-8 h-8" />
+                    </div>
+                    <h3 className="font-headline text-2xl font-semibold mb-2">Modern Legacy</h3>
+                    <p className="text-muted-foreground">
+                    Fusing timeless craft with contemporary designs for the conscious global citizen.
+                    </p>
                 </div>
-                <h3 className="font-headline text-2xl font-semibold mb-2">Modern Legacy</h3>
-                <p className="text-muted-foreground">
-                  Fusing timeless craft with contemporary designs for the conscious global citizen.
-                </p>
-              </div>
+              </ScrollAnimation>
             </div>
           </div>
         </section>
@@ -92,12 +107,16 @@ export default function LandingPage() {
         {/* Featured Products Section */}
         <section className="py-16 bg-secondary/30">
           <div className="container px-4">
-            <h2 className="font-headline text-4xl font-bold text-center mb-10">Featured Products</h2>
+            <ScrollAnimation>
+                <h2 className="font-headline text-4xl font-bold text-center mb-10">Featured Products</h2>
+            </ScrollAnimation>
             <FeaturedProducts />
              <div className="text-center mt-12">
-                <Button asChild variant="outline" size="lg">
-                    <Link href="/shop">View All Products</Link>
-                </Button>
+                <ScrollAnimation>
+                    <Button asChild variant="outline" size="lg">
+                        <Link href="/shop">View All Products</Link>
+                    </Button>
+                </ScrollAnimation>
              </div>
           </div>
         </section>
