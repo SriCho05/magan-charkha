@@ -7,7 +7,7 @@ export default function LoadingScreen() {
       className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-background"
     >
        <div className="flex items-center justify-center">
-            <svg viewBox="0 0 800 100" className="w-[500px] h-auto md:w-[600px]">
+            <svg viewBox="0 0 800 120" className="w-[500px] h-auto md:w-[600px]">
                 <text 
                     className="font-cursive text-8xl font-bold animate-draw-stroke"
                     x="50%" 
