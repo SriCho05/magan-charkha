@@ -9,7 +9,7 @@ export default function AdminDashboard() {
     <div>
       <h1 className="text-3xl font-headline font-bold mb-6">Dashboard</h1>
       <p className="text-muted-foreground mb-8">
-        Welcome to the Khadi Kraft admin panel. Here you can manage your products and orders.
+        Welcome to the Magancharkha admin panel. Here you can manage your products and orders.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>

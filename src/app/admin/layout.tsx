@@ -55,7 +55,7 @@ export default function AdminLayout({
             <SidebarHeader>
                 <div className="flex items-center gap-2 p-2">
                     <Leaf className="w-6 h-6 text-primary" />
-                    <span className="font-headline text-xl font-bold">Khadi Kraft Admin</span>
+                    <span className="font-headline text-xl font-bold">Magancharkha Admin</span>
                 </div>
             </SidebarHeader>
             <SidebarContent>

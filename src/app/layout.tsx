@@ -1,24 +1,33 @@
-import type { Metadata } from "next";
+
+'use client';
+
+import { useState, useEffect } from 'react';
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from "@/providers/cart-provider";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { AuthProvider } from "@/providers/auth-provider";
-
-export const metadata: Metadata = {
-  title: "Khadi Kraft",
-  description: "Authentic Khadi products, handcrafted for you.",
-};
+import LoadingScreen from '@/components/loading-screen';
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading time
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <html lang="en" className="h-full">
       <head>
+        <title>Magancharkha</title>
+        <meta name="description" content="Authentic Khadi products, handcrafted for you." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -35,16 +44,19 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
-        <AuthProvider>
-          <CartProvider>
-              <div className="flex-grow flex flex-col">
-                <Header />
-                <main className="flex-grow">{children}</main>
-              </div>
-              <Footer />
-              <Toaster />
-          </CartProvider>
-        </AuthProvider>
+        {loading && <LoadingScreen />}
+        <div className={loading ? 'hidden' : 'flex flex-col flex-grow'}>
+            <AuthProvider>
+            <CartProvider>
+                <div className="flex-grow flex flex-col">
+                    <Header />
+                    <main className="flex-grow">{children}</main>
+                </div>
+                <Footer />
+                <Toaster />
+            </CartProvider>
+            </AuthProvider>
+        </div>
       </body>
     </html>
   );

@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex justify-center items-center mb-4">
           <Leaf className="w-5 h-5 text-primary mr-2"/>
           <p className="text-sm">
-            &copy; {new Date().getFullYear()} Khadi Kraft. All rights reserved.
+            &copy; {new Date().getFullYear()} Magancharkha. All rights reserved.
           </p>
         </div>
         <div className="flex justify-center gap-4">
