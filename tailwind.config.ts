@@ -19,6 +19,7 @@ export default {
       fontFamily: {
         body: ['"PT Sans"', 'sans-serif'],
         headline: ['"Playfair Display"', 'serif'],
+        cursive: ['"Dancing Script"', 'cursive'],
         code: ['monospace'],
       },
       colors: {
@@ -105,20 +106,26 @@ export default {
                 transform: 'translateY(0)'
             }
         },
-        'typing': {
-            from: { width: '0' },
-            to: { width: '100%' }
-        },
-        'blink-caret': {
-            'from, to': { 'border-color': 'transparent' },
-            '50%': { 'border-color': 'hsl(var(--primary))' }
+        'draw-stroke': {
+            '0%': {
+                'stroke-dasharray': '1500',
+                'stroke-dashoffset': '1500',
+                'fill-opacity': '0'
+            },
+            '70%': {
+                'fill-opacity': '0'
+            },
+            '100%': {
+                'stroke-dashoffset': '0',
+                'fill-opacity': '1'
+            }
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
-        'typing': 'typing 2s steps(22, end), blink-caret .75s step-end infinite'
+        'draw-stroke': 'draw-stroke 2.5s ease-in-out forwards'
       },
     },
   },

@@ -78,8 +78,4 @@ body {
     .animation-delay-2000 {
         animation-delay: 2s;
     }
-
-    .animate-typing {
-        animation: typing 2s steps(20, end), blink-caret .75s step-end infinite;
-    }
 }
