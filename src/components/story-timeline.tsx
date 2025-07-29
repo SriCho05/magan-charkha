@@ -60,9 +60,9 @@ export default function StoryTimeline() {
             A journey of a hundred years, weaving together science, service, and the spirit of self-reliance.
           </p>
         </ScrollAnimation>
-        <div className="relative">
+        <div className="relative pt-4 pb-8">
           {/* Timeline Line */}
-          <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-border" />
+          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-border" />
 
           <div className="space-y-16">
             {timelineEvents.map((event, index) => (
@@ -81,7 +81,7 @@ export default function StoryTimeline() {
                   {/* Spacer and Node */}
                   <div className="hidden md:flex w-2/12 justify-center">
                     <ScrollAnimation>
-                        <div className="w-4 h-4 rounded-full bg-primary border-4 border-card absolute z-10" />
+                        <div className="w-4 h-4 rounded-full bg-primary border-4 border-card absolute z-10 left-1/2 -translate-x-1/2" />
                     </ScrollAnimation>
                   </div>
 
