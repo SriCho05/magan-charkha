@@ -126,7 +126,7 @@ const WhiteVoid = () => {
 
     const isDarkMode = resolvedTheme === 'dark';
     const backgroundColor = isDarkMode 
-        ? `rgba(10, 10, 10, ${scrollProgress})`
+        ? `rgba(0, 0, 0, ${scrollProgress})`
         : `rgba(255, 255, 255, ${scrollProgress})`;
     const textColor = isDarkMode ? 'text-background' : 'text-foreground';
 
