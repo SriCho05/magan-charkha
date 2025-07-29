@@ -160,12 +160,7 @@ export default function LandingPage() {
             </div>
         </section>
         
-        <div className="relative">
-             {/* This container will create the fade-out effect at the bottom */}
-            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-background to-transparent pointer-events-none z-10" />
-            <StoryTimeline />
-        </div>
-
+        <StoryTimeline />
         <WhiteVoid />
 
       </main>

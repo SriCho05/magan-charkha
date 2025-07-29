@@ -52,7 +52,7 @@ const timelineEvents = [
 
 export default function StoryTimeline() {
   return (
-    <section className="py-20 bg-background overflow-x-hidden">
+    <section className="pt-20 bg-background overflow-x-hidden relative">
       <div className="container mx-auto px-4">
         <ScrollAnimation>
           <h2 className="font-headline text-4xl font-bold text-center mb-4">Our Story</h2>
@@ -60,13 +60,13 @@ export default function StoryTimeline() {
             A journey of a hundred years, weaving together science, service, and the spirit of self-reliance.
           </p>
         </ScrollAnimation>
-        <div className="relative pt-4 pb-8">
-          {/* This container will create the fade-out effect at the bottom */}
+        <div className="relative">
+          {/* The solid timeline line */}
           <div
             className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-border"
           />
 
-          <div className="space-y-16">
+          <div className="space-y-16 pb-16">
             {timelineEvents.map((event, index) => (
                 <div key={index} className={cn("relative flex items-center", index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse")}>
                   {/* Content */}
@@ -105,6 +105,8 @@ export default function StoryTimeline() {
           </div>
         </div>
       </div>
+      {/* This container will create the fade-out effect at the bottom */}
+      <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
     </section>
   );
 }
