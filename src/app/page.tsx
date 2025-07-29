@@ -8,7 +8,7 @@ import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/actions/product-actions";
 import type { Product } from "@/lib/types";
 import ScrollAnimation from "@/components/scroll-animation";
-import TimelineLoader from "@/components/timeline-loader";
+import StoryTimeline from "@/components/story-timeline";
 
 
 async function FeaturedProducts() {
@@ -159,7 +159,7 @@ export default function LandingPage() {
             </div>
         </section>
         
-        <TimelineLoader />
+        <StoryTimeline />
 
       </main>
     </div>
