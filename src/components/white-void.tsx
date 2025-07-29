@@ -13,6 +13,18 @@ const textLines = [
     "Wear the legacy.",
 ];
 
+// Helper to parse HSL strings like '20 15% 10%' into an object
+const parseHsl = (hslStr: string) => {
+    if (!hslStr) return { h: 0, s: 0, l: 0 };
+    const [h, s, l] = hslStr.replace(/%/g, '').split(' ').map(Number);
+    return { h, s, l };
+};
+
+// Helper to interpolate between two HSL lightness values
+const interpolateLightness = (l1: number, l2: number, progress: number) => {
+    return l1 + (l2 - l1) * progress;
+};
+
 const WhiteVoid = () => {
     const router = useRouter();
     const sectionRef = useRef<HTMLDivElement>(null);
@@ -23,8 +35,18 @@ const WhiteVoid = () => {
     const [isFixed, setIsFixed] = useState(false);
     const [hasNavigated, setHasNavigated] = useState(false);
     const [isUserScrolling, setIsUserScrolling] = useState(false);
+    const [initialBgHsl, setInitialBgHsl] = useState({ h: 0, s: 0, l: 0 });
     
     const { resolvedTheme } = useTheme();
+
+    // Effect to grab the theme's background color for interpolation
+    useEffect(() => {
+        // We need to get the computed style from the root element to find the HSL values
+        const rootStyle = getComputedStyle(document.documentElement);
+        const bgHslString = rootStyle.getPropertyValue('--background').trim();
+        setInitialBgHsl(parseHsl(bgHslString));
+    }, [resolvedTheme]);
+
 
     // Main effect for scroll-based animation logic
     useEffect(() => {
@@ -34,25 +56,20 @@ const WhiteVoid = () => {
             const { top, height } = sectionRef.current.getBoundingClientRect();
             const windowHeight = window.innerHeight;
             
-            // Section becomes fixed when its top reaches the top of the viewport
             const isCurrentlyFixed = top <= 0;
             
             setIsFixed(isCurrentlyFixed);
 
             if (isCurrentlyFixed) {
-                // Calculate progress based on how much of the "scrollable" part of the div has been scrolled
                 const scrollableHeight = height - windowHeight;
                 const progress = Math.min(1, (-top) / scrollableHeight);
                 setScrollProgress(progress);
 
-                // If progress reaches 1, start navigation
                 if (progress >= 1 && !hasNavigated) {
                     setHasNavigated(true);
-                    // Use a timeout to allow the final fade-out animation to complete
                     setTimeout(() => router.push('/shop'), 500); 
                 }
             } else {
-                 // Reset progress if scrolling back up before the section is fixed
                  setScrollProgress(0);
             }
         };
@@ -64,11 +81,8 @@ const WhiteVoid = () => {
     // Effect for handling auto-scrolling
     useEffect(() => {
         const autoScroll = () => {
-            // Stop if section is no longer fixed, user is interacting, or navigation has started
             if (!isFixed || isUserScrolling || hasNavigated) {
-                if (scrollAnimationRef.current) {
-                    cancelAnimationFrame(scrollAnimationRef.current);
-                }
+                if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
                 return;
             }
             
@@ -76,7 +90,6 @@ const WhiteVoid = () => {
             const totalStages = lineCount + 1;
             const currentStage = Math.floor(scrollProgress * totalStages);
             
-            // Use a faster scroll speed after the last text line has been displayed
             const scrollSpeed = currentStage >= lineCount ? 2.5 : 1.2;
 
             window.scrollBy(0, scrollSpeed);
@@ -86,15 +99,11 @@ const WhiteVoid = () => {
         if (isFixed && !isUserScrolling && !hasNavigated) {
             scrollAnimationRef.current = requestAnimationFrame(autoScroll);
         } else {
-             if (scrollAnimationRef.current) {
-                cancelAnimationFrame(scrollAnimationRef.current);
-            }
+             if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
         }
 
         return () => {
-            if (scrollAnimationRef.current) {
-                cancelAnimationFrame(scrollAnimationRef.current);
-            }
+            if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
         };
     }, [isFixed, isUserScrolling, hasNavigated, scrollProgress]);
 
@@ -103,12 +112,8 @@ const WhiteVoid = () => {
     useEffect(() => {
         const handleUserScroll = () => {
             setIsUserScrolling(true);
-            if (userScrollTimeoutRef.current) {
-                clearTimeout(userScrollTimeoutRef.current);
-            }
-            userScrollTimeoutRef.current = setTimeout(() => {
-                setIsUserScrolling(false);
-            }, 250); // User is considered "stopped" after 250ms of inactivity
+            if (userScrollTimeoutRef.current) clearTimeout(userScrollTimeoutRef.current);
+            userScrollTimeoutRef.current = setTimeout(() => setIsUserScrolling(false), 250);
         };
 
         window.addEventListener('wheel', handleUserScroll, { passive: true });
@@ -117,25 +122,22 @@ const WhiteVoid = () => {
         return () => {
             window.removeEventListener('wheel', handleUserScroll);
             window.removeEventListener('touchstart', handleUserScroll);
-            if (userScrollTimeoutRef.current) {
-                clearTimeout(userScrollTimeoutRef.current);
-            }
+            if (userScrollTimeoutRef.current) clearTimeout(userScrollTimeoutRef.current);
         };
     }, []);
     
     const lineCount = textLines.length;
-    // Divide progress into stages for each line + a final fade-out stage
     const totalStages = lineCount + 1;
     const activeStage = Math.min(totalStages - 1, Math.floor(scrollProgress * totalStages));
-    const activeLineIndex = activeStage < lineCount ? activeStage : -1; // -1 means no line is active
-
-    // Fade out the text completely in the last stage
+    const activeLineIndex = activeStage < lineCount ? activeStage : -1; 
     const textOpacity = activeStage >= lineCount ? 0 : 1;
-
     const isDarkMode = resolvedTheme === 'dark';
-    const backgroundColor = isDarkMode 
-        ? `rgba(0, 0, 0, ${scrollProgress})`
-        : `rgba(255, 255, 255, ${scrollProgress})`;
+
+    // Interpolate the background color for a smooth fade
+    const targetLightness = isDarkMode ? 0 : 100; // Fade to black (0%) or white (100%)
+    const currentLightness = interpolateLightness(initialBgHsl.l, targetLightness, scrollProgress);
+    const backgroundColor = `hsl(${initialBgHsl.h}, ${initialBgHsl.s}%, ${currentLightness}%)`;
+
     const textColor = isDarkMode ? 'text-foreground' : 'text-foreground';
 
     return (
@@ -151,7 +153,7 @@ const WhiteVoid = () => {
                 }}
             >
                 <div
-                    className="h-full w-full flex items-center justify-center transition-colors duration-500"
+                    className="h-full w-full flex items-center justify-center transition-colors duration-50" // Fast transition to keep up with scroll
                     style={{ backgroundColor }}
                 >
                     <div 
