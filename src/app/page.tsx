@@ -146,8 +146,8 @@ export default function LandingPage() {
         {/* Parallax Section 2: Philosophy */}
         <section 
             className="parallax-section min-h-[50vh] py-20 flex items-center" 
-            style={{backgroundImage: "url('https://placehold.co/1920x1080.png')"}}
-            data-ai-hint="fabric detail"
+            style={{backgroundImage: "url('/photos/WhatsApp Image 2022-01-16 at 6.29.32 PM.jpeg')"}}
+            data-ai-hint="modern fashion"
         >
              <div className="absolute inset-0 bg-black/60"></div>
             <div className="container mx-auto px-4 z-10 text-center text-white">
