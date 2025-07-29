@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -119,13 +120,19 @@ export default {
                 'stroke-dashoffset': '0',
                 'fill-opacity': '1'
             }
+        },
+        'shake': {
+            '0%, 100%': { transform: 'translateX(0)' },
+            '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
+            '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' },
         }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
-        'draw-stroke': 'draw-stroke 2.5s ease-in-out forwards'
+        'draw-stroke': 'draw-stroke 2.5s ease-in-out forwards',
+        'shake': 'shake 0.5s ease-in-out',
       },
     },
   },

@@ -18,9 +18,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function CartSheet() {
-  const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart } = useCart();
+  const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart, isAnimating } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -43,7 +44,7 @@ export default function CartSheet() {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
-          <ShoppingCart className="h-5 w-5" />
+          <ShoppingCart className={cn("h-5 w-5", isAnimating && 'animate-shake')} />
           {cartCount > 0 && (
             <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-primary-foreground bg-primary rounded-full transform translate-x-1/2 -translate-y-1/2">
               {cartCount}

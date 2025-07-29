@@ -13,6 +13,7 @@ interface CartContextType {
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
+  isAnimating: boolean;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -21,6 +22,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isMounted, setIsMounted] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -62,6 +64,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         title: "Added to cart",
         description: `${quantity} x ${product.name}`,
     });
+
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 500); // Animation duration
   };
 
   const removeFromCart = (productId: string) => {
@@ -102,7 +107,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal, isAnimating }}>
       {children}
     </CartContext.Provider>
   );
