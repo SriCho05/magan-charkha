@@ -35,7 +35,7 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative h-[60vh] min-h-[400px] flex items-center justify-center text-center bg-secondary/30">
+        <section className="relative h-screen flex items-center justify-center text-center bg-secondary/30">
            <Image
             src="https://placehold.co/1600x900.png"
             alt="Khadi fabric texture"
