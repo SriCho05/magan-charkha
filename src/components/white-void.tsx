@@ -16,11 +16,17 @@ const textLines = [
 const WhiteVoid = () => {
     const router = useRouter();
     const sectionRef = useRef<HTMLDivElement>(null);
+    const scrollAnimationRef = useRef<number>();
+    const userScrollTimeoutRef = useRef<NodeJS.Timeout>();
+
     const [scrollProgress, setScrollProgress] = useState(0);
     const [isFixed, setIsFixed] = useState(false);
     const [hasNavigated, setHasNavigated] = useState(false);
+    const [isUserScrolling, setIsUserScrolling] = useState(false);
+    
     const { resolvedTheme } = useTheme();
 
+    // Main effect for scroll-based animation logic
     useEffect(() => {
         const handleScroll = () => {
             if (!sectionRef.current || hasNavigated) return;
@@ -28,8 +34,11 @@ const WhiteVoid = () => {
             const { top, height } = sectionRef.current.getBoundingClientRect();
             const windowHeight = window.innerHeight;
             
-            if (top <= 0) {
-                setIsFixed(true);
+            const isCurrentlyFixed = top <= 0 && top > -(height - windowHeight);
+            
+            setIsFixed(top <= 0);
+
+            if (isCurrentlyFixed) {
                 const progress = Math.min(1, (-top) / (height - windowHeight));
                 setScrollProgress(progress);
 
@@ -37,23 +46,75 @@ const WhiteVoid = () => {
                     setHasNavigated(true);
                     setTimeout(() => router.push('/shop'), 500); 
                 }
-            } else {
-                setIsFixed(false);
-                setScrollProgress(0);
+            } else if (top > 0) {
+                 setScrollProgress(0);
             }
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, [router, hasNavigated]);
+
+    // Effect for handling auto-scrolling
+    useEffect(() => {
+        const autoScroll = () => {
+            if (!isFixed || isUserScrolling || hasNavigated) {
+                if (scrollAnimationRef.current) {
+                    cancelAnimationFrame(scrollAnimationRef.current);
+                }
+                return;
+            }
+            window.scrollBy(0, 1); // Adjust speed here
+            scrollAnimationRef.current = requestAnimationFrame(autoScroll);
+        };
+
+        if (isFixed && !isUserScrolling && !hasNavigated) {
+            scrollAnimationRef.current = requestAnimationFrame(autoScroll);
+        } else {
+             if (scrollAnimationRef.current) {
+                cancelAnimationFrame(scrollAnimationRef.current);
+            }
+        }
+
+        return () => {
+            if (scrollAnimationRef.current) {
+                cancelAnimationFrame(scrollAnimationRef.current);
+            }
+        };
+    }, [isFixed, isUserScrolling, hasNavigated]);
+
+
+    // Effect for detecting user scroll interaction
+    useEffect(() => {
+        const handleUserScroll = () => {
+            setIsUserScrolling(true);
+            if (userScrollTimeoutRef.current) {
+                clearTimeout(userScrollTimeoutRef.current);
+            }
+            userScrollTimeoutRef.current = setTimeout(() => {
+                setIsUserScrolling(false);
+            }, 150); // User is considered "stopped" after 150ms of inactivity
+        };
+
+        window.addEventListener('wheel', handleUserScroll, { passive: true });
+        window.addEventListener('touchstart', handleUserScroll, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleUserScroll);
+            window.removeEventListener('touchstart', handleUserScroll);
+            if (userScrollTimeoutRef.current) {
+                clearTimeout(userScrollTimeoutRef.current);
+            }
+        };
+    }, []);
     
     const lineCount = textLines.length;
     const activeLineIndex = Math.min(lineCount - 1, Math.floor(scrollProgress * (lineCount + 1)));
-    const fadeOutOpacity = scrollProgress > 0.9 ? (1 - scrollProgress) / 0.1 : 1;
+    const fadeOutOpacity = scrollProgress > 0.95 ? (1 - scrollProgress) / 0.05 : 1;
 
     const isDarkMode = resolvedTheme === 'dark';
     const backgroundColor = isDarkMode 
-        ? `rgba(0, 0, 0, ${scrollProgress})` 
+        ? `rgba(10, 10, 10, ${scrollProgress})`
         : `rgba(255, 255, 255, ${scrollProgress})`;
     const textColor = isDarkMode ? 'text-background' : 'text-foreground';
 
