@@ -8,6 +8,7 @@ import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/actions/product-actions";
 import type { Product } from "@/lib/types";
 import ScrollAnimation from "@/components/scroll-animation";
+import ClothAnimation from "@/components/cloth-animation";
 
 
 async function FeaturedProducts() {
@@ -35,15 +36,8 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative h-screen flex items-center justify-center text-center bg-secondary/30">
-           <Image
-            src="https://placehold.co/1600x900.png"
-            alt="Khadi fabric texture"
-            fill
-            className="opacity-20 object-cover"
-            data-ai-hint="fabric texture"
-            priority
-          />
+        <section className="relative h-screen flex items-center justify-center text-center bg-background">
+          <ClothAnimation />
           <div className="container px-4 z-10">
             <ScrollAnimation>
                 <h1 className="font-headline text-5xl md:text-7xl font-bold mb-4">
