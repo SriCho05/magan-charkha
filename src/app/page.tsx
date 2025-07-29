@@ -64,7 +64,7 @@ export default function LandingPage() {
         </section>
 
         {/* Values Section */}
-        <section className="py-16 bg-background">
+        <section className="py-20 bg-background">
           <div className="container px-4">
             <div className="grid md:grid-cols-3 gap-12 text-center">
               <ScrollAnimation>
@@ -103,9 +103,26 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Parallax Section 1: Craftsmanship */}
+        <section 
+            className="parallax-section min-h-[50vh] py-20 flex items-center" 
+            style={{backgroundImage: "url('https://placehold.co/1920x1080.png')"}}
+            data-ai-hint="spinning wheel"
+        >
+            <div className="absolute inset-0 bg-black/50"></div>
+            <div className="container mx-auto px-4 z-10 text-center text-white">
+                <ScrollAnimation>
+                    <h2 className="font-headline text-4xl font-bold mb-4">The Art of Khadi</h2>
+                    <p className="max-w-2xl mx-auto text-lg text-white/90">
+                        From cotton pod to finished fabric, every step is a testament to patience and artistry. Our Khadi is hand-spun and hand-woven by skilled artisans in rural communities, preserving a rich cultural heritage and supporting sustainable livelihoods.
+                    </p>
+                </ScrollAnimation>
+            </div>
+        </section>
         
         {/* Featured Products Section */}
-        <section className="py-16 bg-secondary/30">
+        <section className="py-20 bg-secondary/30">
           <div className="container px-4">
             <ScrollAnimation>
                 <h2 className="font-headline text-4xl font-bold text-center mb-10">Featured Products</h2>
@@ -119,6 +136,23 @@ export default function LandingPage() {
                 </ScrollAnimation>
              </div>
           </div>
+        </section>
+
+        {/* Parallax Section 2: Philosophy */}
+        <section 
+            className="parallax-section min-h-[50vh] py-20 flex items-center" 
+            style={{backgroundImage: "url('https://placehold.co/1920x1080.png')"}}
+            data-ai-hint="fabric detail"
+        >
+             <div className="absolute inset-0 bg-black/60"></div>
+            <div className="container mx-auto px-4 z-10 text-center text-white">
+                <ScrollAnimation>
+                    <h2 className="font-headline text-4xl font-bold mb-4">A Modern Legacy</h2>
+                    <p className="max-w-2xl mx-auto text-lg text-white/90">
+                        We believe in fashion that is both beautiful and meaningful. Magancharkha reinterprets traditional Khadi for the modern wardrobe, creating pieces that are timeless, versatile, and conscious. It's more than clothing; it's a piece of history, a commitment to sustainability, and a statement of mindful living.
+                    </p>
+                </ScrollAnimation>
+            </div>
         </section>
 
       </main>

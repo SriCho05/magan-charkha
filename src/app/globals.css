@@ -78,4 +78,11 @@ body {
     .animation-delay-2000 {
         animation-delay: 2s;
     }
+    .parallax-section {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        position: relative;
+    }
 }
