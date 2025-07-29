@@ -8,6 +8,8 @@ import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/actions/product-actions";
 import type { Product } from "@/lib/types";
 import ScrollAnimation from "@/components/scroll-animation";
+import TimelineLoader from "@/components/timeline-loader";
+
 
 async function FeaturedProducts() {
   const allProducts = await getProducts();
@@ -156,6 +158,8 @@ export default function LandingPage() {
                 </ScrollAnimation>
             </div>
         </section>
+        
+        <TimelineLoader />
 
       </main>
     </div>
