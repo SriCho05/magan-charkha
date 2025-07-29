@@ -66,7 +66,7 @@ export default function StoryTimeline() {
             className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-border"
           />
 
-          <div className="space-y-16 pb-16">
+          <div className="space-y-16 pb-32">
             {timelineEvents.map((event, index) => (
                 <div key={index} className={cn("relative flex items-center", index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse")}>
                   {/* Content */}
