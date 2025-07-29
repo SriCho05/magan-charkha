@@ -71,7 +71,15 @@ const WhiteVoid = () => {
                 }
                 return;
             }
-            window.scrollBy(0, 1.2); // Adjust speed here
+            
+            const lineCount = textLines.length;
+            const totalStages = lineCount + 1;
+            const currentStage = Math.floor(scrollProgress * totalStages);
+            
+            // Use a faster scroll speed after the last text line has been displayed
+            const scrollSpeed = currentStage >= lineCount ? 2.5 : 1.2;
+
+            window.scrollBy(0, scrollSpeed);
             scrollAnimationRef.current = requestAnimationFrame(autoScroll);
         };
 
@@ -88,7 +96,7 @@ const WhiteVoid = () => {
                 cancelAnimationFrame(scrollAnimationRef.current);
             }
         };
-    }, [isFixed, isUserScrolling, hasNavigated]);
+    }, [isFixed, isUserScrolling, hasNavigated, scrollProgress]);
 
 
     // Effect for detecting user scroll interaction
