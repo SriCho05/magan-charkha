@@ -113,7 +113,7 @@ export default function LandingPage() {
         <section 
             className="parallax-section min-h-[50vh] py-20 flex items-center" 
             style={{backgroundImage: "url('https://placehold.co/1920x1080.png')"}}
-            data-ai-hint="spinning wheel"
+            data-ai-hint="khadi weaving"
         >
             <div className="absolute inset-0 bg-black/50"></div>
             <div className="container mx-auto px-4 z-10 text-center text-white">
