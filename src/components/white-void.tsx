@@ -128,7 +128,7 @@ const WhiteVoid = () => {
     const backgroundColor = isDarkMode 
         ? `rgba(0, 0, 0, ${scrollProgress})`
         : `rgba(255, 255, 255, ${scrollProgress})`;
-    const textColor = isDarkMode ? 'text-background' : 'text-foreground';
+    const textColor = isDarkMode ? 'text-foreground' : 'text-foreground';
 
     return (
         <div ref={sectionRef} className="relative bg-background" style={{ height: '300vh' }}>
