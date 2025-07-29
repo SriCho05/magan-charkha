@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
 
 const textLines = [
@@ -18,6 +19,7 @@ const WhiteVoid = () => {
     const [scrollProgress, setScrollProgress] = useState(0);
     const [isFixed, setIsFixed] = useState(false);
     const [hasNavigated, setHasNavigated] = useState(false);
+    const { resolvedTheme } = useTheme();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -26,18 +28,14 @@ const WhiteVoid = () => {
             const { top, height } = sectionRef.current.getBoundingClientRect();
             const windowHeight = window.innerHeight;
             
-            // Start the effect when the top of the section reaches the top of the viewport
             if (top <= 0) {
                 setIsFixed(true);
-                // Calculate progress from 0 to 1 based on how far we've scrolled into the section
-                // The total scrollable distance for the animation is height - windowHeight
                 const progress = Math.min(1, (-top) / (height - windowHeight));
                 setScrollProgress(progress);
 
-                // Trigger navigation when we've scrolled past the component
                 if (progress >= 1 && !hasNavigated) {
                     setHasNavigated(true);
-                    setTimeout(() => router.push('/shop'), 500); // Delay for fade-out
+                    setTimeout(() => router.push('/shop'), 500); 
                 }
             } else {
                 setIsFixed(false);
@@ -49,12 +47,15 @@ const WhiteVoid = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, [router, hasNavigated]);
     
-    // Determine which text line is active
     const lineCount = textLines.length;
     const activeLineIndex = Math.min(lineCount - 1, Math.floor(scrollProgress * (lineCount + 1)));
-
-    // Calculate fade for the final black-out transition
     const fadeOutOpacity = scrollProgress > 0.9 ? (1 - scrollProgress) / 0.1 : 1;
+
+    const isDarkMode = resolvedTheme === 'dark';
+    const backgroundColor = isDarkMode 
+        ? `rgba(0, 0, 0, ${scrollProgress})` 
+        : `rgba(255, 255, 255, ${scrollProgress})`;
+    const textColor = isDarkMode ? 'text-background' : 'text-foreground';
 
     return (
         <div ref={sectionRef} className="relative bg-background" style={{ height: '300vh' }}>
@@ -69,7 +70,7 @@ const WhiteVoid = () => {
             >
                 <div
                     className="h-screen w-full flex items-center justify-center transition-colors duration-500"
-                    style={{ backgroundColor: `rgba(255, 255, 255, ${scrollProgress})` }}
+                    style={{ backgroundColor }}
                 >
                     <div 
                         className="text-center transition-opacity duration-300"
@@ -82,7 +83,8 @@ const WhiteVoid = () => {
                                     key={index}
                                     className={cn(
                                         'font-headline text-4xl md:text-6xl absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 transition-opacity duration-1000',
-                                        isVisible ? 'opacity-100' : 'opacity-0'
+                                        isVisible ? 'opacity-100' : 'opacity-0',
+                                        textColor
                                     )}
                                 >
                                     {line}

@@ -85,7 +85,7 @@ export default function ShopPage() {
 
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 animate-fade-in-up">
       <header className="text-center mb-12">
         <h1 className="font-headline text-4xl md:text-5xl font-bold mb-2">
           Our Collection
