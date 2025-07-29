@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
@@ -71,6 +72,7 @@ export default function Header() {
                     </Button>
                 )}
                 <CartSheet />
+                <ThemeToggle />
             </div>
         </div>
       </div>

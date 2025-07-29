@@ -9,6 +9,7 @@ import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 import { AuthProvider } from "@/providers/auth-provider";
 import LoadingScreen from '@/components/loading-screen';
+import { ThemeProvider } from "@/providers/theme-provider";
 
 export default function RootLayout({
   children,
@@ -24,7 +25,7 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" suppressHydrationWarning>
       <head>
         <title>Magancharkha</title>
         <meta name="description" content="Authentic Khadi products, handcrafted for you." />
@@ -49,18 +50,25 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen">
         {loading && <LoadingScreen />}
-        <div className={loading ? 'hidden' : 'flex flex-col flex-grow'}>
-            <AuthProvider>
-            <CartProvider>
-                <div className="flex-grow flex flex-col">
-                    <Header />
-                    <main className="flex-grow">{children}</main>
-                </div>
-                <Footer />
-                <Toaster />
-            </CartProvider>
-            </AuthProvider>
-        </div>
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <div className={loading ? 'hidden' : 'flex flex-col flex-grow'}>
+                <AuthProvider>
+                <CartProvider>
+                    <div className="flex-grow flex flex-col">
+                        <Header />
+                        <main className="flex-grow">{children}</main>
+                    </div>
+                    <Footer />
+                    <Toaster />
+                </CartProvider>
+                </AuthProvider>
+            </div>
+        </ThemeProvider>
       </body>
     </html>
   );
