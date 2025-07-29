@@ -61,8 +61,14 @@ export default function StoryTimeline() {
           </p>
         </ScrollAnimation>
         <div className="relative pt-4 pb-8">
-          {/* Timeline Line */}
-          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-border" />
+          {/* Timeline Line with Gradient */}
+          <div 
+            className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-border"
+            style={{
+                maskImage: 'linear-gradient(to bottom, black 0%, black 75%, transparent 100%)',
+                WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 75%, transparent 100%)',
+            }}
+          />
 
           <div className="space-y-16">
             {timelineEvents.map((event, index) => (
