@@ -9,6 +9,7 @@ import { getProducts } from "@/lib/actions/product-actions";
 import type { Product } from "@/lib/types";
 import ScrollAnimation from "@/components/scroll-animation";
 import StoryTimeline from "@/components/story-timeline";
+import WhiteVoid from "@/components/white-void";
 
 
 async function FeaturedProducts() {
@@ -160,6 +161,8 @@ export default function LandingPage() {
         </section>
         
         <StoryTimeline />
+
+        <WhiteVoid />
 
       </main>
     </div>
