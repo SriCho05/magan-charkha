@@ -34,19 +34,25 @@ const WhiteVoid = () => {
             const { top, height } = sectionRef.current.getBoundingClientRect();
             const windowHeight = window.innerHeight;
             
-            const isCurrentlyFixed = top <= 0 && top > -(height - windowHeight);
+            // Section becomes fixed when its top reaches the top of the viewport
+            const isCurrentlyFixed = top <= 0;
             
-            setIsFixed(top <= 0);
+            setIsFixed(isCurrentlyFixed);
 
             if (isCurrentlyFixed) {
-                const progress = Math.min(1, (-top) / (height - windowHeight));
+                // Calculate progress based on how much of the "scrollable" part of the div has been scrolled
+                const scrollableHeight = height - windowHeight;
+                const progress = Math.min(1, (-top) / scrollableHeight);
                 setScrollProgress(progress);
 
+                // If progress reaches 1, start navigation
                 if (progress >= 1 && !hasNavigated) {
                     setHasNavigated(true);
+                    // Use a timeout to allow the final fade-out animation to complete
                     setTimeout(() => router.push('/shop'), 500); 
                 }
-            } else if (top > 0) {
+            } else {
+                 // Reset progress if scrolling back up before the section is fixed
                  setScrollProgress(0);
             }
         };
@@ -58,13 +64,14 @@ const WhiteVoid = () => {
     // Effect for handling auto-scrolling
     useEffect(() => {
         const autoScroll = () => {
+            // Stop if section is no longer fixed, user is interacting, or navigation has started
             if (!isFixed || isUserScrolling || hasNavigated) {
                 if (scrollAnimationRef.current) {
                     cancelAnimationFrame(scrollAnimationRef.current);
                 }
                 return;
             }
-            window.scrollBy(0, 1); // Adjust speed here
+            window.scrollBy(0, 1.2); // Adjust speed here
             scrollAnimationRef.current = requestAnimationFrame(autoScroll);
         };
 
@@ -93,7 +100,7 @@ const WhiteVoid = () => {
             }
             userScrollTimeoutRef.current = setTimeout(() => {
                 setIsUserScrolling(false);
-            }, 150); // User is considered "stopped" after 150ms of inactivity
+            }, 250); // User is considered "stopped" after 250ms of inactivity
         };
 
         window.addEventListener('wheel', handleUserScroll, { passive: true });
@@ -109,8 +116,13 @@ const WhiteVoid = () => {
     }, []);
     
     const lineCount = textLines.length;
-    const activeLineIndex = Math.min(lineCount - 1, Math.floor(scrollProgress * (lineCount + 1)));
-    const fadeOutOpacity = scrollProgress > 0.95 ? (1 - scrollProgress) / 0.05 : 1;
+    // Divide progress into stages for each line + a final fade-out stage
+    const totalStages = lineCount + 1;
+    const activeStage = Math.min(totalStages - 1, Math.floor(scrollProgress * totalStages));
+    const activeLineIndex = activeStage < lineCount ? activeStage : -1; // -1 means no line is active
+
+    // Fade out the text completely in the last stage
+    const textOpacity = activeStage >= lineCount ? 0 : 1;
 
     const isDarkMode = resolvedTheme === 'dark';
     const backgroundColor = isDarkMode 
@@ -126,16 +138,17 @@ const WhiteVoid = () => {
                     top: 0,
                     left: 0,
                     right: 0,
-                    bottom: 0,
+                    bottom: 'auto',
+                    height: '100vh',
                 }}
             >
                 <div
-                    className="h-screen w-full flex items-center justify-center transition-colors duration-500"
+                    className="h-full w-full flex items-center justify-center transition-colors duration-500"
                     style={{ backgroundColor }}
                 >
                     <div 
-                        className="text-center transition-opacity duration-300"
-                        style={{ opacity: fadeOutOpacity }}
+                        className="text-center transition-opacity duration-500"
+                        style={{ opacity: textOpacity }}
                     >
                         {textLines.map((line, index) => {
                             const isVisible = index === activeLineIndex;
@@ -143,7 +156,8 @@ const WhiteVoid = () => {
                                 <h2
                                     key={index}
                                     className={cn(
-                                        'font-headline text-4xl md:text-6xl absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 transition-opacity duration-1000',
+                                        'font-headline text-4xl md:text-6xl absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-full px-4',
+                                        'transition-opacity duration-1000 ease-in-out',
                                         isVisible ? 'opacity-100' : 'opacity-0',
                                         textColor
                                     )}
