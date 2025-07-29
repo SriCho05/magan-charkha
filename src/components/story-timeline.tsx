@@ -52,7 +52,7 @@ const timelineEvents = [
 
 export default function StoryTimeline() {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-20 bg-background overflow-x-hidden">
       <div className="container mx-auto px-4">
         <ScrollAnimation>
           <h2 className="font-headline text-4xl font-bold text-center mb-4">Our Story</h2>
@@ -66,35 +66,39 @@ export default function StoryTimeline() {
 
           <div className="space-y-16">
             {timelineEvents.map((event, index) => (
-              <ScrollAnimation key={index} className="relative">
-                <div className={cn("flex items-center", index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse")}>
+                <div key={index} className={cn("relative flex items-center", index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse")}>
                   {/* Content */}
                   <div className="md:w-5/12">
-                    <div className="p-6 bg-card rounded-lg shadow-md">
-                      <p className="font-headline text-2xl text-primary mb-2">{event.year}</p>
-                      <h3 className="font-headline text-xl font-bold mb-3">{event.title}</h3>
-                      <p className="text-sm text-muted-foreground">{event.description}</p>
-                    </div>
+                    <ScrollAnimation direction={index % 2 === 0 ? 'right' : 'left'}>
+                        <div className="p-6 bg-card rounded-lg shadow-md">
+                        <p className="font-headline text-2xl text-primary mb-2">{event.year}</p>
+                        <h3 className="font-headline text-xl font-bold mb-3">{event.title}</h3>
+                        <p className="text-sm text-muted-foreground">{event.description}</p>
+                        </div>
+                    </ScrollAnimation>
                   </div>
 
                   {/* Spacer and Node */}
                   <div className="hidden md:flex w-2/12 justify-center">
-                    <div className="w-4 h-4 rounded-full bg-primary border-4 border-card absolute z-10" />
+                    <ScrollAnimation>
+                        <div className="w-4 h-4 rounded-full bg-primary border-4 border-card absolute z-10" />
+                    </ScrollAnimation>
                   </div>
 
                   {/* Image */}
                   <div className="md:w-5/12 hidden md:block">
-                     <Image
-                        src={event.image}
-                        alt={event.title}
-                        width={500}
-                        height={300}
-                        className="rounded-lg shadow-lg object-cover"
-                        data-ai-hint={event.aiHint}
-                      />
+                     <ScrollAnimation direction={index % 2 === 0 ? 'left' : 'right'}>
+                        <Image
+                            src={event.image}
+                            alt={event.title}
+                            width={500}
+                            height={300}
+                            className="rounded-lg shadow-lg object-cover"
+                            data-ai-hint={event.aiHint}
+                        />
+                    </ScrollAnimation>
                   </div>
                 </div>
-              </ScrollAnimation>
             ))}
           </div>
         </div>

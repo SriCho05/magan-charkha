@@ -8,9 +8,10 @@ interface ScrollAnimationProps {
   children: ReactNode;
   className?: string;
   delay?: number;
+  direction?: 'up' | 'left' | 'right';
 }
 
-const ScrollAnimation = ({ children, className, delay = 0 }: ScrollAnimationProps) => {
+const ScrollAnimation = ({ children, className, delay = 0, direction = 'up' }: ScrollAnimationProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -41,12 +42,27 @@ const ScrollAnimation = ({ children, className, delay = 0 }: ScrollAnimationProp
     };
   }, []);
 
+  const getAnimationClasses = () => {
+    if (isVisible) {
+      return 'opacity-100 translate-y-0 translate-x-0';
+    }
+    switch(direction) {
+      case 'left':
+        return 'opacity-0 -translate-x-10';
+      case 'right':
+        return 'opacity-0 translate-x-10';
+      case 'up':
+      default:
+        return 'opacity-0 translate-y-5';
+    }
+  }
+
   return (
     <div
       ref={ref}
       className={cn(
         'transition-all duration-700 ease-out',
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-5',
+        getAnimationClasses(),
         className
       )}
       style={{ transitionDelay: `${delay}ms` }}
