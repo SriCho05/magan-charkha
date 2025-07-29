@@ -8,8 +8,6 @@ import ProductCard from "@/components/product-card";
 import { getProducts } from "@/lib/actions/product-actions";
 import type { Product } from "@/lib/types";
 import ScrollAnimation from "@/components/scroll-animation";
-import ClothAnimation from "@/components/cloth-animation";
-
 
 async function FeaturedProducts() {
   const allProducts = await getProducts();
@@ -36,16 +34,26 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen">
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="relative h-screen flex items-center justify-center text-center bg-background">
-          <ClothAnimation />
-          <div className="container px-4 z-10">
+        <section className="relative h-screen flex items-center justify-center text-center text-white overflow-hidden">
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute z-0 w-auto min-w-full min-h-full max-w-none"
+            >
+                <source src="https://videos.pexels.com/video-files/2527992/2527992-hd_1920_1080_30fps.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+            </video>
+            <div className="absolute inset-0 bg-black/50 z-10"></div>
+          <div className="container px-4 z-20">
             <ScrollAnimation>
                 <h1 className="font-headline text-5xl md:text-7xl font-bold mb-4">
                 The Fabric of Freedom
                 </h1>
             </ScrollAnimation>
             <ScrollAnimation delay={200}>
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8">
                 Experience the timeless elegance of authentic Khadi, handcrafted with passion and woven with tradition.
                 </p>
             </ScrollAnimation>
