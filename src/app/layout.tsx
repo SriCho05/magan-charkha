@@ -19,9 +19,15 @@ export default function RootLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading time
-    const timer = setTimeout(() => setLoading(false), 3000);
-    return () => clearTimeout(timer);
+    // This now waits for the window to be fully loaded, which is a better
+    // indicator of readiness than a fixed timer.
+    if (document.readyState === 'complete') {
+        setLoading(false);
+    } else {
+        const handleLoad = () => setLoading(false);
+        window.addEventListener('load', handleLoad);
+        return () => window.removeEventListener('load', handleLoad);
+    }
   }, []);
 
   return (

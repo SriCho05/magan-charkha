@@ -116,6 +116,10 @@ export default {
             '70%': {
                 'fill-opacity': '0'
             },
+            '85%': {
+                'stroke-dashoffset': '0',
+                'fill-opacity': '1'
+            },
             '100%': {
                 'stroke-dashoffset': '0',
                 'fill-opacity': '1'
@@ -131,7 +135,7 @@ export default {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
-        'draw-stroke': 'draw-stroke 2.5s ease-in-out forwards',
+        'draw-stroke': 'draw-stroke 3s ease-in-out infinite',
         'shake': 'shake 0.5s ease-in-out',
       },
     },
