@@ -85,4 +85,7 @@ body {
         background-size: cover;
         position: relative;
     }
+    .dark iframe[src*="google.com/maps"] {
+        filter: invert(100%) hue-rotate(180deg) contrast(0.8);
+    }
 }
