@@ -49,7 +49,7 @@ export default function ContactPage() {
         
         <Card className="overflow-hidden">
             <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3729.576595568551!2d78.5991956758652!3d20.76755497978438!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd47f5b5b5b5b5b%3A0x5b5b5b5b5b5b5b5b!2sMagan%20Sangrahalaya%20Samiti!5e0!3m2!1sen!2sin!4v1689234567890"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14917.439066347167!2d78.58309194246837!3d20.73812242138986!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bd47f1374ad764f%3A0x550e2d862ef2c73!2sMagan%20Sangrahalaya%20Samiti!5e0!3m2!1sen!2sin!4v1721323315931!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
