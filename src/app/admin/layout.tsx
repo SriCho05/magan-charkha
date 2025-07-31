@@ -14,7 +14,7 @@ import {
   SidebarMenuButton,
   SidebarInset,
 } from "@/components/ui/sidebar";
-import { Leaf, Package, ShoppingBag, LayoutDashboard, ShieldAlert } from "lucide-react";
+import { Leaf, Package, ShoppingBag, LayoutDashboard, ShieldAlert, RotateCcw } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -93,6 +93,18 @@ export default function AdminLayout({
                     <Link href="/admin/orders">
                         <ShoppingBag />
                         <span>Orders</span>
+                    </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                    <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith("/admin/refunds")}
+                    tooltip="Refunds"
+                    >
+                    <Link href="/admin/refunds">
+                        <RotateCcw />
+                        <span>Refunds</span>
                     </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>

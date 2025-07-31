@@ -19,6 +19,13 @@ export interface ShippingAddress {
     phone: string;
 }
 
+export interface RefundDetails {
+    reason: string;
+    requestedAt: string;
+    status: 'Pending' | 'Approved' | 'Rejected';
+    processedAt?: string;
+}
+
 export interface Order {
   id: string;
   userId: string;
@@ -30,9 +37,10 @@ export interface Order {
     price: number;
   }[];
   total: number;
-  status: "Pending" | "Shipped" | "Delivered";
+  status: "Pending" | "Shipped" | "Delivered" | "Refund Requested" | "Refunded";
   date: string;
   shippingAddress: ShippingAddress;
+  refundDetails?: RefundDetails;
 }
 
 export interface CartItem {

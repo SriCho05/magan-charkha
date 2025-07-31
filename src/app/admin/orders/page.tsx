@@ -1,6 +1,6 @@
-"use client";
 
-import { orders } from "@/lib/data";
+'use client';
+
 import {
   Table,
   TableBody,
@@ -8,37 +8,93 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { MoreHorizontal } from "lucide-react";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Order } from '@/lib/types';
+import { getAllOrders, updateOrderStatus } from '@/lib/actions/order-actions';
+import { useToast } from '@/hooks/use-toast';
+import { processRefund } from '@/lib/actions/refund-actions';
 
-const getStatusVariant = (status: "Pending" | "Shipped" | "Delivered") => {
-    switch (status) {
-        case "Pending":
-            return "default";
-        case "Shipped":
-            return "secondary";
-        case "Delivered":
-            return "outline";
-        default:
-            return "default";
-    }
-}
+const getStatusVariant = (status: Order['status']) => {
+  switch (status) {
+    case 'Pending':
+      return 'default';
+    case 'Shipped':
+      return 'secondary';
+    case 'Delivered':
+      return 'outline';
+    case 'Refund Requested':
+      return 'destructive';
+    case 'Refunded':
+      return 'default';
+    default:
+      return 'default';
+  }
+};
 
 export default function AdminOrdersPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    const allOrders = await getAllOrders();
+    setOrders(allOrders);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const handleUpdateStatus = async (orderId: string, status: Order['status']) => {
+    try {
+      await updateOrderStatus(orderId, status);
+      toast({ title: 'Success', description: `Order status updated to ${status}.` });
+      fetchOrders(); // Refresh the list
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update order status.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleProcessRefund = async (orderId: string, outcome: 'Approved' | 'Rejected') => {
+     try {
+      await processRefund(orderId, outcome);
+      toast({ title: 'Success', description: `Refund has been ${outcome.toLowerCase()}.` });
+      fetchOrders(); // Refresh the list
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to process refund.',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  if (loading) {
+    return <p>Loading orders...</p>;
+  }
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-headline font-bold">Orders</h1>
       </div>
-       <div className="rounded-lg border">
+      <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -53,12 +109,14 @@ export default function AdminOrdersPage() {
           <TableBody>
             {orders.map((order) => (
               <TableRow key={order.id}>
-                <TableCell className="font-medium">{order.id}</TableCell>
+                <TableCell className="font-medium">#{order.id.slice(0, 7)}</TableCell>
                 <TableCell>{order.customer}</TableCell>
-                <TableCell>{order.date}</TableCell>
+                <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
                 <TableCell>₹{order.total.toFixed(2)}</TableCell>
                 <TableCell>
-                  <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                  <Badge variant={getStatusVariant(order.status)}>
+                    {order.status}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
@@ -69,9 +127,27 @@ export default function AdminOrdersPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Order</DropdownMenuItem>
-                      <DropdownMenuItem>Mark as Shipped</DropdownMenuItem>
-                      <DropdownMenuItem>Mark as Delivered</DropdownMenuItem>
+                      {order.status === 'Pending' && (
+                        <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'Shipped')}>
+                          Mark as Shipped
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === 'Shipped' && (
+                         <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'Delivered')}>
+                          Mark as Delivered
+                        </DropdownMenuItem>
+                      )}
+                      {order.status === 'Refund Requested' && (
+                        <>
+                            <DropdownMenuItem onClick={() => handleProcessRefund(order.id, 'Approved')}>
+                                Approve Refund
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleProcessRefund(order.id, 'Rejected')}>
+                                Reject Refund
+                            </DropdownMenuItem>
+                        </>
+                      )}
+                       <DropdownMenuItem disabled>View Order</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

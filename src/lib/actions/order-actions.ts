@@ -3,10 +3,12 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
 import type { CartItem, Order, ShippingAddress } from '@/lib/types';
+import { adminDb } from "../firebase-admin";
 
 const ordersCollectionRef = collection(db, 'orders');
+const ordersAdminCollectionRef = adminDb.collection('orders');
 
 interface CreateOrderArgs {
     userId: string;
@@ -68,4 +70,30 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
         console.error("Error fetching orders by user ID:", error);
         return [];
     }
+}
+
+export async function getAllOrders(): Promise<Order[]> {
+     try {
+        const querySnapshot = await getDocs(ordersCollectionRef);
+        return querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Order)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    } catch (error) {
+        console.error("Error fetching all orders:", error);
+        return [];
+    }
+}
+
+export async function updateOrderStatus(orderId: string, status: Order['status']) {
+  try {
+    const orderRef = ordersAdminCollectionRef.doc(orderId);
+    await orderRef.update({ status });
+
+    revalidatePath('/admin/orders');
+    revalidatePath('/dashboard');
+  } catch (error) {
+    console.error(`Error updating order ${orderId} status:`, error);
+    throw new Error('Could not update order status.');
+  }
 }
