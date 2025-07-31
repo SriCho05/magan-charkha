@@ -90,7 +90,7 @@ const WhiteVoid = () => {
             const totalStages = lineCount + 1;
             const currentStage = Math.floor(scrollProgress * totalStages);
             
-            const scrollSpeed = currentStage >= lineCount ? 2.5 : 1.2;
+            const scrollSpeed = currentStage >= lineCount ? 2.5 : 1.5;
 
             window.scrollBy(0, scrollSpeed);
             scrollAnimationRef.current = requestAnimationFrame(autoScroll);
