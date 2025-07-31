@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -17,35 +16,35 @@ const timelineEvents = [
     year: '1949',
     title: 'A New Visionary',
     description: `Dr. Devendra Kumar, an oil technologist, joined Gandhi’s movement. He began efforts to uplift the rural poor using science and technology.`,
-    image: '/photos/picture2.png',
+    image: '/photos/Picture2.png',
     aiHint: 'indian village',
   },
   {
     year: '1952–1960',
     title: 'Understanding Rural Life',
     description: `Devendra Bhai lived with the landless poor in Machala, a hilly village near Indore, for 8 years to deeply understand rural life.`,
-    image: '/photos/picture3.png',
+    image: '/photos/Picture3.png',
     aiHint: 'village landscape',
   },
   {
     year: '1972-1978',
     title: 'Research & Innovation',
     description: `Devendra Bhai assisted Kumarappaji, a Gandhian economist, in research and innovation in village industries for six years.`,
-    image: '/photos/picture4.png',
+    image: '/photos/Picture4.png',
     aiHint: 'old workshop',
   },
   {
     year: '1978',
     title: 'A Centre is Born',
     description: `Centre of Science for Villages (CSV) was founded at Magan Sangrahalaya, Wardha by Devendra Bhai. His daughter, Dr. Vibha Gupta, joined him and started working toward sustainable rural livelihoods.`,
-    image: '/photos/picture5.png',
+    image: '/photos/Picture5.png',
     aiHint: 'father daughter',
   },
   {
     year: 'Present',
     title: 'Carrying the Legacy Forward',
     description: `Dr. Vibha Gupta carries forward her father's mission. She currently serves as the Chairperson of the Magan Sangrahalaya Samiti, overseeing Magan Khadi’s operations focused on organic khadi, rural artisanship, and sustainable livelihoods.`,
-    image: '/photos/picture6.png',
+    image: '/photos/Picture1.png',
     aiHint: 'woman leader',
   },
 ];
@@ -66,7 +65,7 @@ export default function StoryTimeline() {
             className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-0.5 bg-border"
           />
 
-          <div className="space-y-16 pb-32">
+          <div className="space-y-16 pb-64">
             {timelineEvents.map((event, index) => (
                 <div key={index} className={cn("relative flex items-center", index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse")}>
                   {/* Content */}

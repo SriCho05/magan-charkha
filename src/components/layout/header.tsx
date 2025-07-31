@@ -42,6 +42,12 @@ export default function Header() {
             >
                 Shop
             </Link>
+            <Link
+                href="/contact"
+                className="text-sm font-medium transition-colors hover:text-primary"
+            >
+                Contact
+            </Link>
             </nav>
             <div className="flex items-center gap-2">
                 {user ? (
