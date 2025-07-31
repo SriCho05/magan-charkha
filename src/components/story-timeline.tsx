@@ -10,7 +10,7 @@ const timelineEvents = [
     year: '1936',
     title: 'Gandhi in Sevagram',
     description: `Mahatma Gandhi moved to Sevagram, near Wardha, and made it his base. He founded an ashram in Maganwadi, named after Maganlal Gandhi, a rural scientist and Gandhi’s close associate.`,
-    image: '/photos/picture1.png',
+    image: 'https://assets.telegraphindia.com/telegraph/2021/Sep/1631914245_18gandhi_6.jpg',
     aiHint: 'gandhi spinning',
   },
   {
