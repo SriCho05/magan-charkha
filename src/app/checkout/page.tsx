@@ -4,7 +4,7 @@
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState }from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 import { createOrder } from "@/lib/actions/order-actions";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 const shippingSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -39,6 +42,52 @@ const processPayment = async (): Promise<{ success: boolean }> => {
     return { success: isSuccess };
 };
 
+function UpiDialog({ onPaymentSuccess }: { onPaymentSuccess: () => void }) {
+    const [verifying, setVerifying] = useState(false);
+
+    useEffect(() => {
+        // Start "verifying" payment after a delay
+        const timer = setTimeout(() => {
+            setVerifying(true);
+            // Simulate payment success after another delay
+            const successTimer = setTimeout(() => {
+                onPaymentSuccess();
+            }, 4000); // 4 seconds for verification
+            return () => clearTimeout(successTimer);
+        }, 3000); // 3 seconds to "scan"
+
+        return () => clearTimeout(timer);
+    }, [onPaymentSuccess]);
+
+    return (
+        <Dialog open={true}>
+            <DialogContent onInteractOutside={(e) => e.preventDefault()} hideCloseButton>
+                <DialogHeader>
+                    <DialogTitle className="font-headline text-center">Complete Your Payment</DialogTitle>
+                    <DialogDescription className="text-center">
+                        Scan the QR code with your favorite UPI app.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center p-4 space-y-4">
+                    {!verifying ? (
+                        <>
+                            <Image src="https://placehold.co/256x256.png?text=Scan+Me" alt="UPI QR Code" width={256} height={256} data-ai-hint="upi qr code" />
+                            <p className="text-sm text-muted-foreground">Waiting for payment...</p>
+                        </>
+
+                    ) : (
+                        <>
+                            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+                            <p className="text-lg font-medium">Verifying payment...</p>
+                            <p className="text-sm text-muted-foreground">Please do not close this window.</p>
+                        </>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 
 export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth();
@@ -46,6 +95,8 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [showUpiDialog, setShowUpiDialog] = useState(false);
 
   const form = useForm<ShippingFormValues>({
     resolver: zodResolver(shippingSchema),
@@ -68,40 +119,44 @@ export default function CheckoutPage() {
         toast({ title: "Your cart is empty", description: "Please add items to your cart before checking out." });
         router.push("/");
       } else {
-        // Pre-fill form with user's name if available
         form.setValue("name", user.displayName || user.email?.split('@')[0] || '');
       }
     }
   }, [user, authLoading, cartItems, router, toast, form]);
 
+  const handleSuccessfulOrder = async (shippingData: ShippingFormValues) => {
+    if (!user || !user.email) return;
+
+    await createOrder({
+        userId: user.uid, 
+        customer: shippingData.name, 
+        shippingAddress: shippingData,
+        items: cartItems
+    });
+    clearCart();
+    router.push('/order-status?status=success');
+  };
+  
   const onSubmit = async (data: ShippingFormValues) => {
-    if (!user || !user.email) {
-        toast({ title: "Error", description: "You must be logged in to place an order.", variant: "destructive" });
-        return;
-    }
-    
     setIsSubmitting(true);
     
     try {
-        const paymentResult = await processPayment();
-        
-        if (paymentResult.success) {
-            await createOrder({
-                userId: user.uid, 
-                customer: data.name, 
-                shippingAddress: data,
-                items: cartItems
-            });
-            clearCart();
-            router.push('/order-status?status=success');
-        } else {
-            router.push('/order-status?status=failed');
+        if (paymentMethod === 'card') {
+            const paymentResult = await processPayment();
+            if (paymentResult.success) {
+                await handleSuccessfulOrder(data);
+            } else {
+                router.push('/order-status?status=failed');
+            }
+        } else if (paymentMethod === 'upi') {
+            setShowUpiDialog(true);
+            // The UpiDialog will call handleSuccessfulOrder on its own timer
         }
     } catch (error) {
         console.error("Checkout error:", error)
         toast({ title: "An unexpected error occurred", description: "Please try again.", variant: "destructive" });
     } finally {
-        setIsSubmitting(false);
+        if(paymentMethod === 'card') setIsSubmitting(false);
     }
   };
 
@@ -109,18 +164,27 @@ export default function CheckoutPage() {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
+  const getButtonText = () => {
+    if (isSubmitting) return "Processing...";
+    if (paymentMethod === 'card') return `Pay ₹${cartTotal.toFixed(2)}`;
+    return "Generate UPI QR Code";
+  }
+
   return (
     <div className="container mx-auto px-4 py-12">
+      {showUpiDialog && (
+        <UpiDialog onPaymentSuccess={() => handleSuccessfulOrder(form.getValues())} />
+      )}
       <h1 className="text-3xl font-headline font-bold mb-8 text-center">Checkout</h1>
       <div className="grid md:grid-cols-2 gap-12">
         <div>
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline">Shipping Information</CardTitle>
+              <CardTitle className="font-headline">1. Shipping Information</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form id="shipping-form" className="space-y-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -203,43 +267,70 @@ export default function CheckoutPage() {
                         )}
                     />
                   </div>
-                  <Button type="submit" size="lg" className="w-full mt-6" disabled={isSubmitting}>
-                    {isSubmitting ? "Processing Payment..." : `Pay ₹${cartTotal.toFixed(2)}`}
-                  </Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
         </div>
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="font-headline">Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <Image src={item.image} alt={item.name} width={64} height={64} className="rounded-md object-cover" data-ai-hint="product image" />
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
-                      </div>
+        <div className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">2. Payment Method</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="card" id="card" />
+                            <Label htmlFor="card">Credit/Debit Card</Label>
+                        </div>
+                         <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="upi" id="upi" />
+                            <Label htmlFor="upi">UPI / QR Code</Label>
+                        </div>
+                    </RadioGroup>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                <CardTitle className="font-headline">3. Order Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                <div className="space-y-4">
+                    {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                        <Image src={item.image} alt={item.name} width={64} height={64} className="rounded-md object-cover" data-ai-hint="product image" />
+                        <div>
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                        </div>
+                        </div>
+                        <p className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</p>
                     </div>
-                    <p className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
-                ))}
-                <Separator />
-                <div className="flex justify-between items-center font-bold text-lg">
-                  <p>Total</p>
-                  <p>₹{cartTotal.toFixed(2)}</p>
+                    ))}
+                    <Separator />
+                    <div className="flex justify-between items-center font-bold text-lg">
+                    <p>Total</p>
+                    <p>₹{cartTotal.toFixed(2)}</p>
+                    </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+            </Card>
+            <Button
+                type="submit"
+                form="shipping-form"
+                onClick={form.handleSubmit(onSubmit)}
+                size="lg"
+                className="w-full"
+                disabled={isSubmitting}
+            >
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {getButtonText()}
+            </Button>
         </div>
       </div>
     </div>
   );
 }
+
+    
