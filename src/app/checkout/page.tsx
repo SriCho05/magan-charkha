@@ -17,8 +17,10 @@ import { createOrder } from "@/lib/actions/order-actions";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+
 
 const shippingSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -42,22 +44,16 @@ const processPayment = async (): Promise<{ success: boolean }> => {
     return { success: isSuccess };
 };
 
-function UpiDialog({ onPaymentSuccess }: { onPaymentSuccess: () => void }) {
-    const [verifying, setVerifying] = useState(false);
+function UpiDialog({ onPaymentSuccess, cartTotal }: { onPaymentSuccess: () => void, cartTotal: number }) {
+    const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        // Start "verifying" payment after a delay
-        const timer = setTimeout(() => {
-            setVerifying(true);
-            // Simulate payment success after another delay
-            const successTimer = setTimeout(() => {
-                onPaymentSuccess();
-            }, 4000); // 4 seconds for verification
-            return () => clearTimeout(successTimer);
-        }, 3000); // 3 seconds to "scan"
-
-        return () => clearTimeout(timer);
-    }, [onPaymentSuccess]);
+    const handleConfirmPayment = () => {
+        setIsLoading(true);
+        // Simulate a brief delay before confirming, then proceed.
+        setTimeout(() => {
+            onPaymentSuccess();
+        }, 1500);
+    }
 
     return (
         <Dialog open={true}>
@@ -65,24 +61,29 @@ function UpiDialog({ onPaymentSuccess }: { onPaymentSuccess: () => void }) {
                 <DialogHeader>
                     <DialogTitle className="font-headline text-center">Complete Your Payment</DialogTitle>
                     <DialogDescription className="text-center">
-                        Scan the QR code with your favorite UPI app.
+                        Scan the QR code with your UPI app to pay <span className="font-bold">₹{cartTotal.toFixed(2)}</span>.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col items-center justify-center p-4 space-y-4">
-                    {!verifying ? (
-                        <>
-                            <Image src="https://placehold.co/256x256.png?text=Scan+Me" alt="UPI QR Code" width={256} height={256} data-ai-hint="upi qr code" />
-                            <p className="text-sm text-muted-foreground">Waiting for payment...</p>
-                        </>
-
-                    ) : (
-                        <>
-                            <Loader2 className="h-16 w-16 animate-spin text-primary" />
-                            <p className="text-lg font-medium">Verifying payment...</p>
-                            <p className="text-sm text-muted-foreground">Please do not close this window.</p>
-                        </>
-                    )}
+                    {/* IMPORTANT: Replace this placeholder with your actual UPI QR code image */}
+                    <Image 
+                        src="https://placehold.co/256x256.png?text=Replace+with+your+QR+Code" 
+                        alt="UPI QR Code" 
+                        width={256} 
+                        height={256} 
+                        data-ai-hint="upi qr code" 
+                    />
+                    <p className="text-sm text-center text-muted-foreground">
+                        After paying, click the button below to confirm your order.
+                        Your order will be processed upon verification of payment.
+                    </p>
                 </div>
+                <DialogFooter>
+                    <Button onClick={handleConfirmPayment} disabled={isLoading} className="w-full">
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isLoading ? "Confirming..." : "I have paid"}
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     )
@@ -150,7 +151,7 @@ export default function CheckoutPage() {
             }
         } else if (paymentMethod === 'upi') {
             setShowUpiDialog(true);
-            // The UpiDialog will call handleSuccessfulOrder on its own timer
+            // The UpiDialog will call handleSuccessfulOrder when the user confirms payment.
         }
     } catch (error) {
         console.error("Checkout error:", error)
@@ -167,13 +168,13 @@ export default function CheckoutPage() {
   const getButtonText = () => {
     if (isSubmitting) return "Processing...";
     if (paymentMethod === 'card') return `Pay ₹${cartTotal.toFixed(2)}`;
-    return "Generate UPI QR Code";
+    return "Proceed with UPI";
   }
 
   return (
     <div className="container mx-auto px-4 py-12">
       {showUpiDialog && (
-        <UpiDialog onPaymentSuccess={() => handleSuccessfulOrder(form.getValues())} />
+        <UpiDialog onPaymentSuccess={() => handleSuccessfulOrder(form.getValues())} cartTotal={cartTotal} />
       )}
       <h1 className="text-3xl font-headline font-bold mb-8 text-center">Checkout</h1>
       <div className="grid md:grid-cols-2 gap-12">
@@ -281,7 +282,7 @@ export default function CheckoutPage() {
                     <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-2">
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="card" id="card" />
-                            <Label htmlFor="card">Credit/Debit Card</Label>
+                            <Label htmlFor="card">Credit/Debit Card (Test)</Label>
                         </div>
                          <div className="flex items-center space-x-2">
                             <RadioGroupItem value="upi" id="upi" />
@@ -332,5 +333,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
-    
