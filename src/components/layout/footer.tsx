@@ -15,6 +15,7 @@ export default function Footer() {
             <Link href="#" className="text-sm hover:text-primary transition-colors">Facebook</Link>
             <Link href="#" className="text-sm hover:text-primary transition-colors">Instagram</Link>
             <Link href="#" className="text-sm hover:text-primary transition-colors">Twitter</Link>
+            <Link href="/terms-and-conditions" className="text-sm hover:text-primary transition-colors">Terms & Conditions</Link>
         </div>
       </div>
     </footer>
