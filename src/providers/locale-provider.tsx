@@ -5,11 +5,46 @@ import React, { createContext, useState, useEffect, ReactNode, useCallback } fro
 import en from '@/lib/locales/en';
 import hi from '@/lib/locales/hi';
 import es from '@/lib/locales/es';
+import ar from '@/lib/locales/ar';
+import bn from '@/lib/locales/bn';
+import de from '@/lib/locales/de';
+import fr from '@/lib/locales/fr';
+import id from '@/lib/locales/id';
+import ja from '@/lib/locales/ja';
+import ko from '@/lib/locales/ko';
+import mr from '@/lib/locales/mr';
+import pt from '@/lib/locales/pt';
+import ru from '@/lib/locales/ru';
+import ta from '@/lib/locales/ta';
+import te from '@/lib/locales/te';
+import tr from '@/lib/locales/tr';
+import ur from '@/lib/locales/ur';
+import vi from '@/lib/locales/vi';
+import yue from '@/lib/locales/yue';
+import zh from '@/lib/locales/zh';
+
 
 const translations: Record<string, Record<string, string>> = {
   en,
   hi,
   es,
+  ar,
+  bn,
+  de,
+  fr,
+  id,
+  ja,
+  ko,
+  mr,
+  pt,
+  ru,
+  ta,
+  te,
+  tr,
+  ur,
+  vi,
+  yue,
+  zh,
 };
 
 interface LocaleContextType {
