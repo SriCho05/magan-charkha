@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import CartSheet from "@/components/cart-sheet";
-import { Leaf, User } from "lucide-react";
+import { Leaf, User, Globe } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,11 +15,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
+const languages = [
+    "English", "Mandarin Chinese", "Hindi", "Spanish", "French", 
+    "Modern Standard Arabic", "Bengali", "Russian", "Portuguese", 
+    "Urdu", "Indonesian", "German", "Japanese", "Marathi", "Telugu", 
+    "Turkish", "Tamil", "Cantonese", "Vietnamese", "Korean"
+];
+
 export default function Header() {
   const { user, logout } = useAuth();
+  const { toast } = useToast();
+
+  const handleLanguageSelect = (lang: string) => {
+    toast({
+        title: "Language Selected",
+        description: `${lang} has been selected. (UI placeholder)`
+    });
+  }
 
   return (
     <header className="bg-background/80 backdrop-blur-sm sticky top-0 z-40 border-b">
@@ -49,7 +66,7 @@ export default function Header() {
                 Contact
             </Link>
             </nav>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
                 {user ? (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -78,6 +95,25 @@ export default function Header() {
                     </Button>
                 )}
                 <CartSheet />
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <Globe className="h-5 w-5" />
+                            <span className="sr-only">Select language</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Select Language</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <ScrollArea className="h-72 w-48">
+                            {languages.map(lang => (
+                                <DropdownMenuItem key={lang} onClick={() => handleLanguageSelect(lang)}>
+                                    {lang}
+                                </DropdownMenuItem>
+                            ))}
+                        </ScrollArea>
+                    </DropdownMenuContent>
+                </DropdownMenu>
                 <ThemeToggle />
             </div>
         </div>
@@ -85,3 +121,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
