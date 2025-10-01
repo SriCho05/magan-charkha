@@ -10,6 +10,7 @@ import Footer from "@/components/layout/footer";
 import { AuthProvider } from "@/providers/auth-provider";
 import LoadingScreen from '@/components/loading-screen';
 import { ThemeProvider } from "@/providers/theme-provider";
+import { LocaleProvider } from '@/providers/locale-provider';
 
 export default function RootLayout({
   children,
@@ -62,6 +63,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+          <LocaleProvider>
             <div className={loading ? 'hidden' : 'flex flex-col flex-grow'}>
                 <AuthProvider>
                 <CartProvider>
@@ -74,6 +76,7 @@ export default function RootLayout({
                 </CartProvider>
                 </AuthProvider>
             </div>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

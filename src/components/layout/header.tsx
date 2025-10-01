@@ -15,27 +15,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLocale } from "@/hooks/use-locale";
+import { languages } from "@/lib/locales/languages";
 
 const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
 
-const languages = [
-    "English", "Mandarin Chinese", "Hindi", "Spanish", "French", 
-    "Modern Standard Arabic", "Bengali", "Russian", "Portuguese", 
-    "Urdu", "Indonesian", "German", "Japanese", "Marathi", "Telugu", 
-    "Turkish", "Tamil", "Cantonese", "Vietnamese", "Korean"
-];
 
 export default function Header() {
   const { user, logout } = useAuth();
-  const { toast } = useToast();
+  const { t, setLocale, locale } = useLocale();
 
-  const handleLanguageSelect = (lang: string) => {
-    toast({
-        title: "Language Selected",
-        description: `${lang} has been selected. (UI placeholder)`
-    });
+  const handleLanguageSelect = (langCode: string) => {
+    setLocale(langCode);
   }
 
   return (
@@ -51,19 +43,19 @@ export default function Header() {
                 href="/"
                 className="text-sm font-medium transition-colors hover:text-primary"
             >
-                Home
+                {t('Home')}
             </Link>
              <Link
                 href="/shop"
                 className="text-sm font-medium transition-colors hover:text-primary"
             >
-                Shop
+                {t('Shop')}
             </Link>
             <Link
                 href="/contact"
                 className="text-sm font-medium transition-colors hover:text-primary"
             >
-                Contact
+                {t('Contact')}
             </Link>
             </nav>
             <div className="flex items-center gap-1">
@@ -75,23 +67,23 @@ export default function Header() {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('My Account')}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem asChild>
-                                <Link href="/dashboard">Dashboard</Link>
+                                <Link href="/dashboard">{t('Dashboard')}</Link>
                             </DropdownMenuItem>
                             {user.email === ADMIN_EMAIL && (
                                 <DropdownMenuItem asChild>
-                                    <Link href="/admin">Admin Panel</Link>
+                                    <Link href="/admin">{t('Admin Panel')}</Link>
                                 </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                            <DropdownMenuItem onClick={logout}>{t('Logout')}</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 ) : (
                     <Button asChild variant="ghost" size="sm">
-                        <Link href="/login">Login</Link>
+                        <Link href="/login">{t('Login')}</Link>
                     </Button>
                 )}
                 <CartSheet />
@@ -103,12 +95,12 @@ export default function Header() {
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Select Language</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t('Select Language')}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <ScrollArea className="h-72 w-48">
-                            {languages.map(lang => (
-                                <DropdownMenuItem key={lang} onClick={() => handleLanguageSelect(lang)}>
-                                    {lang}
+                            {Object.entries(languages).map(([code, name]) => (
+                                <DropdownMenuItem key={code} onClick={() => handleLanguageSelect(code)}>
+                                    {name}
                                 </DropdownMenuItem>
                             ))}
                         </ScrollArea>
@@ -121,5 +113,3 @@ export default function Header() {
     </header>
   );
 }
-
-    
