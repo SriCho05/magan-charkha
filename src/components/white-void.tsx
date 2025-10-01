@@ -5,8 +5,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { cn } from '@/lib/utils';
+import { useLocale } from '@/hooks/use-locale';
 
-const textLines = [
+const textLineKeys = [
     "A thread of history...",
     "...woven into the future.",
     "Each piece tells a story.",
@@ -26,6 +27,7 @@ const interpolateLightness = (l1: number, l2: number, progress: number) => {
 };
 
 const WhiteVoid = () => {
+    const { t } = useLocale();
     const router = useRouter();
     const sectionRef = useRef<HTMLDivElement>(null);
     const scrollAnimationRef = useRef<number>();
@@ -38,6 +40,8 @@ const WhiteVoid = () => {
     const [initialBgHsl, setInitialBgHsl] = useState({ h: 0, s: 0, l: 0 });
     
     const { resolvedTheme } = useTheme();
+
+    const textLines = textLineKeys.map(key => t(key));
 
     // Effect to grab the theme's background color for interpolation
     useEffect(() => {
@@ -105,7 +109,7 @@ const WhiteVoid = () => {
         return () => {
             if (scrollAnimationRef.current) cancelAnimationFrame(scrollAnimationRef.current);
         };
-    }, [isFixed, isUserScrolling, hasNavigated, scrollProgress]);
+    }, [isFixed, isUserScrolling, hasNavigated, scrollProgress, textLines.length]);
 
 
     // Effect for detecting user scroll interaction

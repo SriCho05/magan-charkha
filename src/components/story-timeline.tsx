@@ -1,62 +1,66 @@
+
 'use client';
 
 import Image from 'next/image';
 import ScrollAnimation from './scroll-animation';
 import { cn } from '@/lib/utils';
+import { useLocale } from '@/hooks/use-locale';
 
 const timelineEvents = [
   {
     year: '1936',
-    title: 'Gandhi in Sevagram',
-    description: `Mahatma Gandhi moved to Sevagram, near Wardha, and made it his base. He founded an ashram in Maganwadi, named after Maganlal Gandhi, a rural scientist and Gandhi’s close associate.`,
+    titleKey: '1936_title',
+    descriptionKey: '1936_description',
     image: 'https://assets.telegraphindia.com/telegraph/2021/Sep/1631914245_18gandhi_6.jpg',
     aiHint: 'gandhi spinning',
   },
   {
     year: '1949',
-    title: 'A New Visionary',
-    description: `Dr. Devendra Kumar, an oil technologist, joined Gandhi’s movement. He began efforts to uplift the rural poor using science and technology.`,
+    titleKey: '1949_title',
+    descriptionKey: '1949_description',
     image: '/photos/Picture2.png',
     aiHint: 'indian village',
   },
   {
     year: '1952–1960',
-    title: 'Understanding Rural Life',
-    description: `Devendra Bhai lived with the landless poor in Machala, a hilly village near Indore, for 8 years to deeply understand rural life.`,
+    titleKey: '1952_title',
+    descriptionKey: '1952_description',
     image: '/photos/Picture3.png',
     aiHint: 'village landscape',
   },
   {
     year: '1972-1978',
-    title: 'Research & Innovation',
-    description: `Devendra Bhai assisted Kumarappaji, a Gandhian economist, in research and innovation in village industries for six years.`,
+    titleKey: '1972_title',
+    descriptionKey: '1972_description',
     image: '/photos/Picture4.png',
     aiHint: 'old workshop',
   },
   {
     year: '1978',
-    title: 'A Centre is Born',
-    description: `Centre of Science for Villages (CSV) was founded at Magan Sangrahalaya, Wardha by Devendra Bhai. His daughter, Dr. Vibha Gupta, joined him and started working toward sustainable rural livelihoods.`,
+    titleKey: '1978_title',
+    descriptionKey: '1978_description',
     image: '/photos/Picture5.png',
     aiHint: 'father daughter',
   },
   {
     year: 'Present',
-    title: 'Carrying the Legacy Forward',
-    description: `Dr. Vibha Gupta carries forward her father's mission. She currently serves as the Chairperson of the Magan Sangrahalaya Samiti, overseeing Magan Khadi’s operations focused on organic khadi, rural artisanship, and sustainable livelihoods.`,
+    titleKey: 'Present_title',
+    descriptionKey: 'Present_description',
     image: '/photos/Picture1.png',
     aiHint: 'woman leader',
   },
 ];
 
 export default function StoryTimeline() {
+  const { t } = useLocale();
+
   return (
     <section className="pt-20 bg-background overflow-x-hidden relative">
       <div className="container mx-auto px-4">
         <ScrollAnimation>
-          <h2 className="font-headline text-4xl font-bold text-center mb-4">Our Story</h2>
+          <h2 className="font-headline text-4xl font-bold text-center mb-4">{t('Our Story')}</h2>
           <p className="text-muted-foreground text-lg text-center mb-16 max-w-2xl mx-auto">
-            A journey of a hundred years, weaving together science, service, and the spirit of self-reliance.
+            {t('A journey of a hundred years, weaving together science, service, and the spirit of self-reliance.')}
           </p>
         </ScrollAnimation>
         <div className="relative">
@@ -73,8 +77,8 @@ export default function StoryTimeline() {
                     <ScrollAnimation direction={index % 2 === 0 ? 'right' : 'left'}>
                         <div className="p-6 bg-card rounded-lg shadow-md">
                         <p className="font-headline text-2xl text-primary mb-2">{event.year}</p>
-                        <h3 className="font-headline text-xl font-bold mb-3">{event.title}</h3>
-                        <p className="text-sm text-muted-foreground">{event.description}</p>
+                        <h3 className="font-headline text-xl font-bold mb-3">{t(event.titleKey)}</h3>
+                        <p className="text-sm text-muted-foreground">{t(event.descriptionKey)}</p>
                         </div>
                     </ScrollAnimation>
                   </div>
@@ -91,7 +95,7 @@ export default function StoryTimeline() {
                      <ScrollAnimation direction={index % 2 === 0 ? 'left' : 'right'}>
                         <Image
                             src={event.image}
-                            alt={event.title}
+                            alt={t(event.titleKey)}
                             width={500}
                             height={300}
                             className="rounded-lg shadow-lg object-cover"
