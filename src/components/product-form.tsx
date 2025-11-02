@@ -80,7 +80,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     if (!file) return;
 
     setImagePreview(URL.createObjectURL(file));
-    setUploadProgress(0); // Immediately set progress to 0 to show the bar
+    setUploadProgress(0);
 
     const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
@@ -104,7 +104,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           form.setValue("image", downloadURL);
-          setUploadProgress(null); // Reset progress on completion
+          setUploadProgress(null);
           toast({
             title: "Image uploaded successfully!",
           });
@@ -118,7 +118,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         toast({ title: "Image required", description: "Please upload an image for the product.", variant: "destructive" });
         return;
     }
-    if (uploadProgress !== null) {
+    if (uploadProgress !== null && uploadProgress < 100) {
         toast({ title: "Please wait", description: "Image is still uploading.", variant: "destructive" });
         return;
     }
