@@ -103,7 +103,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           form.setValue("image", downloadURL);
-          setUploadProgress(null);
+          setUploadProgress(null); // Reset progress on completion
           toast({
             title: "Image uploaded successfully!",
           });
@@ -231,12 +231,13 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
-                  </FormControl>
+  
                   <SelectContent>
                     <SelectItem value="Apparel">Apparel</SelectItem>
                     <SelectItem value="Home Decor">Home Decor</SelectItem>
                     <SelectItem value="Accessories">Accessories</SelectItem>
                   </SelectContent>
+                  </FormControl>
                 </Select>
                 <FormMessage />
               </FormItem>
