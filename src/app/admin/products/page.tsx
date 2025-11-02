@@ -1,6 +1,5 @@
 
-"use server";
-
+'use client';
 import {
   Table,
   TableBody,
@@ -26,15 +25,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { getProducts, deleteProduct } from "@/lib/actions/product-actions";
+import { useEffect, useState } from "react";
+import { Product } from "@/lib/types";
 
-async function deleteProductAction(formData: FormData) {
-    const id = formData.get('id') as string;
-    if (id) {
-        await deleteProduct(id);
+function DeleteProductButton({ id, onProductDeleted }: { id: string, onProductDeleted: () => void }) {
+  const deleteProductAction = async () => {
+    try {
+      await deleteProduct(id);
+      onProductDeleted();
+    } catch(e) {
+      console.error(e)
     }
-}
+  }
 
-function DeleteProductButton({ id }: { id: string }) {
   return (
      <AlertDialog>
         <AlertDialogTrigger asChild>
@@ -51,11 +54,8 @@ function DeleteProductButton({ id }: { id: string }) {
             </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <form action={deleteProductAction} className="flex items-center gap-2">
-            <input type="hidden" name="id" value={id} />
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction type="submit">Delete</AlertDialogAction>
-          </form>
+            <AlertDialogAction onClick={deleteProductAction}>Delete</AlertDialogAction>
         </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
@@ -63,8 +63,28 @@ function DeleteProductButton({ id }: { id: string }) {
 }
 
 
-export default async function AdminProductsPage() {
-  const products = await getProducts();
+export default function AdminProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    const prods = await getProducts();
+    setProducts(prods);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleProductDeleted = () => {
+    fetchProducts();
+  }
+
+  if (loading) {
+    return <p>Loading products...</p>
+  }
 
   return (
     <div>
@@ -116,7 +136,7 @@ export default async function AdminProductsPage() {
                           <span className="sr-only">Edit</span>
                           </Link>
                       </Button>
-                      <DeleteProductButton id={product.id} />
+                      <DeleteProductButton id={product.id} onProductDeleted={handleProductDeleted} />
                     </TableCell>
                 </TableRow>
                 ))

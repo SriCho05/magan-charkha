@@ -4,7 +4,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/firebase";
 import { adminDb } from "@/lib/firebase-admin";
-import { collection, getDocs, getDoc, doc, writeBatch, setDoc, updateDoc, deleteDoc, query } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, writeBatch, setDoc, updateDoc, query } from 'firebase/firestore';
 import type { Product } from '@/lib/types';
 import { products as initialProducts } from '@/lib/data';
 
@@ -92,6 +92,9 @@ export async function updateProduct(product: Product) {
 
 export async function deleteProduct(productId: string) {
   try {
+    if (!productId) {
+        throw new Error("Product ID is required.");
+    }
     // Use the adminDb instance for this server-side write operation
     await productsAdminCollectionRef.doc(productId).delete();
     revalidatePath("/admin/products");
