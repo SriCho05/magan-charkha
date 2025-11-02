@@ -72,6 +72,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   useEffect(() => {
     if (initialData?.image) {
       form.setValue('image', initialData.image);
+      setImagePreview(initialData.image);
     }
   }, [initialData, form]);
 
@@ -103,8 +104,8 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          form.setValue("image", downloadURL);
-          setUploadProgress(null);
+          form.setValue("image", downloadURL, { shouldValidate: true });
+          setUploadProgress(null); // Clear progress on success
           toast({
             title: "Image uploaded successfully!",
           });
@@ -118,7 +119,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         toast({ title: "Image required", description: "Please upload an image for the product.", variant: "destructive" });
         return;
     }
-    if (uploadProgress !== null && uploadProgress < 100) {
+    if (uploadProgress !== null) {
         toast({ title: "Please wait", description: "Image is still uploading.", variant: "destructive" });
         return;
     }
@@ -208,7 +209,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                             <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
                         </div>
                     )}
-                    <Input id="file-upload" type="file" title=" " className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
+                    <Input title=" " id="file-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
                 </div>
                 {uploadProgress !== null && <Progress value={uploadProgress} className="mt-2" />}
                 <FormField control={form.control} name="image" render={({ field }) => (
