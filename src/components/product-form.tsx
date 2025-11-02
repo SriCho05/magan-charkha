@@ -80,6 +80,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     if (!file) return;
 
     setImagePreview(URL.createObjectURL(file));
+    setUploadProgress(0); // Immediately set progress to 0 to show the bar
 
     const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
