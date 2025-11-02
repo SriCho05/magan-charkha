@@ -26,16 +26,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { getProducts, deleteProduct } from "@/lib/actions/product-actions";
-import { revalidatePath } from "next/cache";
 
-async function DeleteProductButton({ id }: { id: string }) {
-  // This needs to be a server action
-  const deleteProductWithId = async () => {
-    "use server"
-    await deleteProduct(id);
-    // No need to revalidate here as the form submission will trigger a page refresh.
-  }
+async function deleteProductAction(formData: FormData) {
+    const id = formData.get('id') as string;
+    if (id) {
+        await deleteProduct(id);
+    }
+}
 
+function DeleteProductButton({ id }: { id: string }) {
   return (
      <AlertDialog>
         <AlertDialogTrigger asChild>
@@ -52,7 +51,8 @@ async function DeleteProductButton({ id }: { id: string }) {
             </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <form action={deleteProductWithId} className="flex gap-2">
+          <form action={deleteProductAction} className="flex items-center gap-2">
+            <input type="hidden" name="id" value={id} />
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction type="submit">Delete</AlertDialogAction>
           </form>
