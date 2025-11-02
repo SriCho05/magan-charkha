@@ -26,7 +26,12 @@ import {
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { addProduct, updateProduct } from "@/lib/actions/product-actions";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import Image from "next/image";
+import { Progress } from "@/components/ui/progress";
+import { UploadCloud } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -48,7 +53,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image || null);
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
@@ -58,152 +65,225 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       category: "Apparel",
       color: "White",
       stock: 0,
-      image: "https://placehold.co/600x600.png",
+      image: "",
     },
   });
 
+  useEffect(() => {
+    if (initialData?.image) {
+      form.setValue('image', initialData.image);
+    }
+  }, [initialData, form]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImagePreview(URL.createObjectURL(file));
+
+    const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error("Upload failed", error);
+        toast({
+          title: "Image upload failed",
+          description: "Please try again.",
+          variant: "destructive",
+        });
+        setUploadProgress(null);
+        setImagePreview(initialData?.image || null);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          form.setValue("image", downloadURL);
+          setUploadProgress(null);
+          toast({
+            title: "Image uploaded successfully!",
+          });
+        });
+      }
+    );
+  };
+
   const onSubmit = async (data: ProductFormValues) => {
+    if (!data.image) {
+        toast({ title: "Image required", description: "Please upload an image for the product.", variant: "destructive" });
+        return;
+    }
+    if (uploadProgress !== null) {
+        toast({ title: "Please wait", description: "Image is still uploading.", variant: "destructive" });
+        return;
+    }
+
     setIsSubmitting(true);
     try {
-        if (initialData) {
-            await updateProduct({ id: initialData.id, ...data });
-            toast({ title: "Product updated successfully!" });
-        } else {
-            await addProduct(data);
-            toast({ title: "Product created successfully!" });
-        }
-        router.push("/admin/products");
-        router.refresh();
+      if (initialData) {
+        await updateProduct({ id: initialData.id, ...data });
+        toast({ title: "Product updated successfully!" });
+      } else {
+        await addProduct(data);
+        toast({ title: "Product created successfully!" });
+      }
+      router.push("/admin/products");
+      router.refresh();
     } catch (error) {
-        toast({ title: "An error occurred.", description: "Could not save the product. Please try again.", variant: "destructive" });
+      toast({
+        title: "An error occurred.",
+        description: "Could not save the product. Please try again.",
+        variant: "destructive",
+      });
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <div className="grid md:grid-cols-2 gap-8">
-            <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                    <Input placeholder="Khadi Kurta" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
-            <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Price</FormLabel>
-                <FormControl>
-                    <Input type="number" placeholder="1200" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-            />
+         <div className="grid md:grid-cols-3 gap-8">
+             <div className="md:col-span-2 grid gap-8">
+                <div className="grid md:grid-cols-2 gap-8">
+                    <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Name</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Khadi Kurta" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="price"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Price</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="1200" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                            <Textarea
+                            placeholder="Describe the product..."
+                            className="resize-none h-32"
+                            {...field}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+             </div>
+              <div className="space-y-2">
+                <FormLabel>Product Image</FormLabel>
+                <div className="aspect-square rounded-md border border-dashed flex flex-col items-center justify-center relative overflow-hidden">
+                    {imagePreview ? (
+                        <Image src={imagePreview} alt="Product preview" fill style={{ objectFit: 'cover' }} data-ai-hint="product image" />
+                    ) : (
+                        <div className="text-center text-muted-foreground p-4">
+                            <UploadCloud className="mx-auto h-12 w-12" />
+                            <p className="mt-2 text-sm">Click to upload or drag and drop</p>
+                            <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
+                        </div>
+                    )}
+                    <Input id="file-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
+                </div>
+                {uploadProgress !== null && <Progress value={uploadProgress} className="mt-2" />}
+                <FormField control={form.control} name="image" render={({ field }) => (
+                    <FormItem className="hidden">
+                        <FormControl><Input {...field} /></FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+            </div>
         </div>
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Describe the product..."
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <div className="grid md:grid-cols-3 gap-8">
-           <FormField
+          <FormField
             control={form.control}
             name="category"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Category</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
+                  <FormControl>
                     <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        <SelectItem value="Apparel">Apparel</SelectItem>
-                        <SelectItem value="Home Decor">Home Decor</SelectItem>
-                        <SelectItem value="Accessories">Accessories</SelectItem>
-                    </SelectContent>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Apparel">Apparel</SelectItem>
+                    <SelectItem value="Home Decor">Home Decor</SelectItem>
+                    <SelectItem value="Accessories">Accessories</SelectItem>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-             <FormField
+          />
+          <FormField
             control={form.control}
             name="color"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Color</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
+                  <FormControl>
                     <SelectTrigger>
-                        <SelectValue placeholder="Select a color" />
+                      <SelectValue placeholder="Select a color" />
                     </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                        <SelectItem value="White">White</SelectItem>
-                        <SelectItem value="Black">Black</SelectItem>
-                        <SelectItem value="Green">Green</SelectItem>
-                        <SelectItem value="Beige">Beige</SelectItem>
-                        <SelectItem value="Brown">Brown</SelectItem>
-                    </SelectContent>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="White">White</SelectItem>
+                    <SelectItem value="Black">Black</SelectItem>
+                    <SelectItem value="Green">Green</SelectItem>
+                    <SelectItem value="Beige">Beige</SelectItem>
+                    <SelectItem value="Brown">Brown</SelectItem>
+                  </SelectContent>
                 </Select>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
-            <FormField
+          />
+          <FormField
             control={form.control}
             name="stock"
             render={({ field }) => (
-                <FormItem>
+              <FormItem>
                 <FormLabel>Stock</FormLabel>
                 <FormControl>
-                    <Input type="number" placeholder="50" {...field} />
+                  <Input type="number" placeholder="50" {...field} />
                 </FormControl>
                 <FormMessage />
-                </FormItem>
+              </FormItem>
             )}
-            />
+          />
         </div>
-        <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-                <FormItem>
-                <FormLabel>Image URL</FormLabel>
-                <FormControl>
-                    <Input placeholder="https://placehold.co/600x600.png" {...field} />
-                </FormControl>
-                <FormMessage />
-                </FormItem>
-            )}
-        />
-        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : initialData ? 'Save changes' : 'Create product'}</Button>
+        
+        <Button type="submit" disabled={isSubmitting || uploadProgress !== null}>
+          {isSubmitting ? "Saving..." : initialData ? "Save changes" : "Create product"}
+        </Button>
       </form>
     </Form>
   );
