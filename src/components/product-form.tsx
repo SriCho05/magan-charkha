@@ -207,7 +207,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                             <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
                         </div>
                     )}
-                    <Input id="file-upload" type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
+                    <Input id="file-upload" type="file" title=" " className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
                 </div>
                 {uploadProgress !== null && <Progress value={uploadProgress} className="mt-2" />}
                 <FormField control={form.control} name="image" render={({ field }) => (
