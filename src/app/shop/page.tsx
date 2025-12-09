@@ -67,7 +67,7 @@ export default function ShopPage() {
     }
 
     if (filters.color !== "all") {
-      filtered = filtered.filter((p) => p.color === p.color);
+      filtered = filtered.filter((p) => p.color === filters.color);
     }
 
     const [sortKey, sortDirection] = sort.split("-");

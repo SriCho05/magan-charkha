@@ -4,7 +4,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
-  category: "Apparel" | "Home Decor" | "Accessories";
+  category: "Men's Apparel" | "Women's Apparel" | "Home & Living" | "Accessories";
   color: "Green" | "Beige" | "Brown" | "White" | "Black";
   image: string;
   stock: number;

@@ -1,3 +1,4 @@
+
 import type { Product, Order } from './types';
 
 export const products: Product[] = [
@@ -6,7 +7,7 @@ export const products: Product[] = [
     name: 'Khadi Kurta',
     description: 'A classic hand-spun and hand-woven Khadi kurta, perfect for any occasion. Made from pure cotton, it offers unparalleled comfort and breathability.',
     price: 1200,
-    category: 'Apparel',
+    category: "Men's Apparel",
     color: 'White',
     image: 'https://placehold.co/600x600.png',
     stock: 50,
@@ -16,7 +17,7 @@ export const products: Product[] = [
     name: 'Olive Green Khadi Saree',
     description: 'Elegant olive green Khadi saree with a traditional border. The lightweight fabric makes it ideal for all-day wear.',
     price: 2500,
-    category: 'Apparel',
+    category: "Women's Apparel",
     color: 'Green',
     image: 'https://placehold.co/600x600.png',
     stock: 30,
@@ -26,7 +27,7 @@ export const products: Product[] = [
     name: 'Handwoven Cushion Cover',
     description: 'Beige cushion cover with subtle brown thread work. Adds a touch of rustic charm to your living space. Size: 16x16 inches.',
     price: 800,
-    category: 'Home Decor',
+    category: 'Home & Living',
     color: 'Beige',
     image: 'https://placehold.co/600x600.png',
     stock: 100,
@@ -46,7 +47,7 @@ export const products: Product[] = [
     name: 'Black Khadi Nehru Jacket',
     description: 'A sophisticated black Khadi Nehru jacket. This versatile piece can be layered over a kurta or shirt for a formal look.',
     price: 1800,
-    category: 'Apparel',
+    category: "Men's Apparel",
     color: 'Black',
     image: 'https://placehold.co/600x600.png',
     stock: 40,
@@ -56,7 +57,7 @@ export const products: Product[] = [
     name: 'Khadi Table Runner',
     description: 'Natural beige Khadi table runner with hand-knotted tassels. Brings a warm, organic feel to your dining table.',
     price: 1100,
-    category: 'Home Decor',
+    category: 'Home & Living',
     color: 'Beige',
     image: 'https://placehold.co/600x600.png',
     stock: 60,

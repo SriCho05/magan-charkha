@@ -37,7 +37,7 @@ const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   description: z.string().min(10, "Description must be at least 10 characters."),
   price: z.coerce.number().positive("Price must be a positive number."),
-  category: z.enum(["Apparel", "Home Decor", "Accessories"]),
+  category: z.enum(["Men's Apparel", "Women's Apparel", "Home & Living", "Accessories"]),
   color: z.enum(["Green", "Beige", "Brown", "White", "Black"]),
   stock: z.coerce.number().int().min(0, "Stock cannot be negative."),
   image: z.string().url("Image must be a valid URL."),
@@ -62,7 +62,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       name: "",
       description: "",
       price: 0,
-      category: "Apparel",
+      category: "Men's Apparel",
       color: "White",
       stock: 0,
       image: "",
@@ -119,7 +119,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
         toast({ title: "Image required", description: "Please upload an image for the product.", variant: "destructive" });
         return;
     }
-    if (uploadProgress !== null) {
+    if (uploadProgress !== null && uploadProgress < 100) {
         toast({ title: "Please wait", description: "Image is still uploading.", variant: "destructive" });
         return;
     }
@@ -235,8 +235,9 @@ export default function ProductForm({ initialData }: ProductFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Apparel">Apparel</SelectItem>
-                    <SelectItem value="Home Decor">Home Decor</SelectItem>
+                    <SelectItem value="Men's Apparel">Men's Apparel</SelectItem>
+                    <SelectItem value="Women's Apparel">Women's Apparel</SelectItem>
+                    <SelectItem value="Home & Living">Home & Living</SelectItem>
                     <SelectItem value="Accessories">Accessories</SelectItem>
                   </SelectContent>
                 </Select>
@@ -283,7 +284,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
           />
         </div>
         
-        <Button type="submit" disabled={isSubmitting || uploadProgress !== null}>
+        <Button type="submit" disabled={isSubmitting || (uploadProgress !== null && uploadProgress < 100)}>
           {isSubmitting ? "Saving..." : initialData ? "Save changes" : "Create product"}
         </Button>
       </form>
