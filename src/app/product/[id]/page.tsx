@@ -31,16 +31,14 @@ function ProductPageContent({ product }: { product: Product }) {
         <div className="flex flex-col justify-center">
           <div className="space-y-4">
             <div className="space-y-2">
-                <div className="flex gap-2">
-                    <Badge variant="secondary">{product.category}</Badge>
-                    <Badge variant="outline">{product.color}</Badge>
-                </div>
+              <div className="flex gap-2">
+                <Badge variant="secondary">{product.category}</Badge>
+                <Badge variant="outline">{product.color}</Badge>
+              </div>
               <h1 className="font-headline text-4xl md:text-5xl font-bold">
                 {product.name}
               </h1>
-              <p className="text-3xl text-primary font-semibold">
-                ₹{product.price.toFixed(2)}
-              </p>
+              Rs. {product.price.toFixed(2)}
             </div>
             <p className="text-muted-foreground text-lg leading-relaxed">
               {product.description}
@@ -92,12 +90,12 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     // You can add a proper skeleton loader here
     return <div className="container mx-auto px-4 py-12">Loading...</div>;
   }
-  
+
   if (!product) {
-      return notFound();
+    return notFound();
   }
 
   return (
-      <ProductPageContent product={product} />
+    <ProductPageContent product={product} />
   );
 }

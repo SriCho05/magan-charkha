@@ -2,13 +2,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where, addDoc, serverTimestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { createClient } from "@/lib/supabase/server";
 import type { CartItem, Order, ShippingAddress } from '@/lib/types';
-import { adminDb } from "../firebase-admin";
-
-const ordersCollectionRef = collection(db, 'orders');
-const ordersAdminCollectionRef = adminDb.collection('orders');
 
 interface CreateOrderArgs {
     userId: string;
@@ -24,7 +19,7 @@ export async function createOrder({ userId, customer, shippingAddress, items }: 
     if (!customer) {
         throw new Error("Customer name is required to create an order.");
     }
-    if(!shippingAddress) {
+    if (!shippingAddress) {
         throw new Error("Shipping address is required to create an order.");
     }
 
@@ -43,11 +38,20 @@ export async function createOrder({ userId, customer, shippingAddress, items }: 
         shippingAddress: shippingAddress,
     };
 
+    const supabase = await createClient();
+
     try {
-        const docRef = await addDoc(ordersCollectionRef, orderData);
+        const { data, error } = await supabase
+            .from('orders')
+            .insert(orderData)
+            .select()
+            .single();
+
+        if (error) throw error;
+
         revalidatePath("/dashboard");
         revalidatePath("/admin/orders");
-        return { id: docRef.id, ...orderData };
+        return data; // Supabase returns the created object with ID
     } catch (error) {
         console.error("Error creating order:", error);
         throw new Error("Could not create order.");
@@ -56,15 +60,18 @@ export async function createOrder({ userId, customer, shippingAddress, items }: 
 
 export async function getOrdersByUserId(userId: string): Promise<Order[]> {
     if (!userId) return [];
-    
+
+    const supabase = await createClient();
     try {
-        const q = query(ordersCollectionRef, where("userId", "==", userId));
-        const querySnapshot = await getDocs(q);
-        
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        } as Order)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('userId', userId)
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        return (data as Order[]) || [];
 
     } catch (error) {
         console.error("Error fetching orders by user ID:", error);
@@ -73,12 +80,16 @@ export async function getOrdersByUserId(userId: string): Promise<Order[]> {
 }
 
 export async function getAllOrders(): Promise<Order[]> {
-     try {
-        const querySnapshot = await getDocs(ordersCollectionRef);
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        } as Order)).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const supabase = await createClient();
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+
+        return (data as Order[]) || [];
     } catch (error) {
         console.error("Error fetching all orders:", error);
         return [];
@@ -86,14 +97,19 @@ export async function getAllOrders(): Promise<Order[]> {
 }
 
 export async function updateOrderStatus(orderId: string, status: Order['status']) {
-  try {
-    const orderRef = ordersAdminCollectionRef.doc(orderId);
-    await orderRef.update({ status });
+    const supabase = await createClient();
+    try {
+        const { error } = await supabase
+            .from('orders')
+            .update({ status })
+            .eq('id', orderId);
 
-    revalidatePath('/admin/orders');
-    revalidatePath('/dashboard');
-  } catch (error) {
-    console.error(`Error updating order ${orderId} status:`, error);
-    throw new Error('Could not update order status.');
-  }
+        if (error) throw error;
+
+        revalidatePath('/admin/orders');
+        revalidatePath('/dashboard');
+    } catch (error) {
+        console.error(`Error updating order ${orderId} status:`, error);
+        throw new Error('Could not update order status.');
+    }
 }

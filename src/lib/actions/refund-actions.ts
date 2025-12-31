@@ -2,23 +2,29 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { adminDb } from '@/lib/firebase-admin';
+import { createClient } from "@/lib/supabase/server";
 
 export async function requestRefund(orderId: string, reason: string) {
   if (!orderId || !reason) {
     throw new Error('Order ID and reason are required.');
   }
 
+  const supabase = await createClient();
+
   try {
-    const orderRef = adminDb.collection('orders').doc(orderId);
-    await orderRef.update({
-      status: 'Refund Requested',
-      refundDetails: {
-        reason: reason,
-        requestedAt: new Date().toISOString(),
-        status: 'Pending',
-      },
-    });
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: 'Refund Requested',
+        refundDetails: {
+          reason: reason,
+          requestedAt: new Date().toISOString(),
+          status: 'Pending',
+        }
+      })
+      .eq('id', orderId);
+
+    if (error) throw error;
 
     revalidatePath('/dashboard');
     revalidatePath('/admin/refunds');
@@ -35,23 +41,41 @@ export async function processRefund(orderId: string, outcome: 'Approved' | 'Reje
     throw new Error('Order ID and outcome are required.');
   }
 
-  try {
-    const orderRef = adminDb.collection('orders').doc(orderId);
-    const doc = await orderRef.get();
-    if (!doc.exists) {
-        throw new Error("Order not found");
-    }
-    
-    const orderData = doc.data();
+  const supabase = await createClient();
 
-    await orderRef.update({
-      status: outcome === 'Approved' ? 'Refunded' : 'Delivered', // Revert to delivered if rejected
-      refundDetails: {
-        ...orderData?.refundDetails,
-        status: outcome,
-        processedAt: new Date().toISOString(),
-      },
-    });
+  try {
+    // We need to fetch current refundDetails first to preserve other fields if any, 
+    // though here we are just updating status and processedAt.
+    // Actually, `processRefund` existing logic merges `...orderData?.refundDetails`.
+
+    // Fetch
+    const { data: order, error: fetchError } = await supabase
+      .from('orders')
+      .select('refundDetails')
+      .eq('id', orderId)
+      .single();
+
+    if (fetchError || !order) {
+      throw new Error("Order not found");
+    }
+
+    const currentRefundDetails = order.refundDetails as any; // Cast as any or RefundDetails
+
+    const newRefundDetails = {
+      ...currentRefundDetails,
+      status: outcome,
+      processedAt: new Date().toISOString(),
+    };
+
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        status: outcome === 'Approved' ? 'Refunded' : 'Delivered', // Revert to delivered if rejected
+        refundDetails: newRefundDetails,
+      })
+      .eq('id', orderId);
+
+    if (error) throw error;
 
     revalidatePath('/dashboard');
     revalidatePath('/admin/refunds');

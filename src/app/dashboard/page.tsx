@@ -23,36 +23,36 @@ function RefundDialog({ order, onOpenChange, onRefundRequested }: { order: Order
 
     const handleSubmit = async () => {
         if (reason.trim().length < 10) {
-            toast({ title: "Reason required", description: "Please provide a reason of at least 10 characters.", variant: "destructive"});
+            toast({ title: "Reason required", description: "Please provide a reason of at least 10 characters.", variant: "destructive" });
             return;
         }
         setIsSubmitting(true);
         try {
             await requestRefund(order.id, reason);
-            toast({ title: "Success", description: "Your refund request has been submitted."});
+            toast({ title: "Success", description: "Your refund request has been submitted." });
             onRefundRequested();
             onOpenChange(false);
         } catch (error) {
-            toast({ title: "Error", description: "Failed to submit refund request.", variant: "destructive"});
+            toast({ title: "Error", description: "Failed to submit refund request.", variant: "destructive" });
         } finally {
             setIsSubmitting(false);
         }
     }
 
     return (
-         <Dialog defaultOpen onOpenChange={onOpenChange}>
+        <Dialog defaultOpen onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
-                <DialogTitle>Request Refund for Order #{order.id.slice(0, 7)}</DialogTitle>
-                <DialogDescription>
-                    Please provide a reason for your refund request. This will be sent to our admin team for review.
-                </DialogDescription>
+                    <DialogTitle>Request Refund for Order #{order.id.slice(0, 7)}</DialogTitle>
+                    <DialogDescription>
+                        Please provide a reason for your refund request. This will be sent to our admin team for review.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
                         <Label htmlFor="reason">Reason for Refund</Label>
-                        <Textarea 
-                            id="reason" 
+                        <Textarea
+                            id="reason"
                             value={reason}
                             onChange={(e) => setReason(e.target.value)}
                             placeholder="e.g., Item was damaged upon arrival..."
@@ -81,9 +81,9 @@ function OrderHistory({ orders, onOrderUpdate }: { orders: Order[], onOrderUpdat
         setSelectedOrder(order);
         setDialogOpen(true);
     }
-    
+
     const getStatusVariant = (status: Order['status']) => {
-        switch(status) {
+        switch (status) {
             case 'Delivered': return 'outline';
             case 'Refund Requested': return 'destructive';
             case 'Refunded': return 'default';
@@ -116,7 +116,7 @@ function OrderHistory({ orders, onOrderUpdate }: { orders: Order[], onOrderUpdat
                             <TableRow key={order.id}>
                                 <TableCell className="font-medium text-primary">#{order.id.slice(0, 7)}</TableCell>
                                 <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                                <TableCell>₹{order.total.toFixed(2)}</TableCell>
+                                <TableCell>Rs. {order.total.toFixed(2)}</TableCell>
                                 <TableCell><Badge variant={getStatusVariant(order.status)}>{order.status}</Badge></TableCell>
                                 <TableCell className="text-right">
                                     {order.status === 'Delivered' && (
@@ -129,8 +129,8 @@ function OrderHistory({ orders, onOrderUpdate }: { orders: Order[], onOrderUpdat
                 </Table>
             </div>
             {dialogOpen && selectedOrder && (
-                <RefundDialog 
-                    order={selectedOrder} 
+                <RefundDialog
+                    order={selectedOrder}
                     onOpenChange={setDialogOpen}
                     onRefundRequested={() => {
                         onOrderUpdate();
@@ -144,60 +144,60 @@ function OrderHistory({ orders, onOrderUpdate }: { orders: Order[], onOrderUpdat
 
 
 export default function DashboardPage() {
-  const { user, loading, logout } = useAuth();
-  const router = useRouter();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [ordersLoading, setOrdersLoading] = useState(true);
+    const { user, loading, logout } = useAuth();
+    const router = useRouter();
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [ordersLoading, setOrdersLoading] = useState(true);
 
-  const fetchOrders = async () => {
-    if (user) {
-        setOrdersLoading(true);
-        const userOrders = await getOrdersByUserId(user.uid);
-        setOrders(userOrders);
-        setOrdersLoading(false);
+    const fetchOrders = async () => {
+        if (user) {
+            setOrdersLoading(true);
+            const userOrders = await getOrdersByUserId(user.id);
+            setOrders(userOrders);
+            setOrdersLoading(false);
+        }
     }
-  }
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
+    useEffect(() => {
+        if (!loading && !user) {
+            router.push("/login");
+        }
+        fetchOrders();
+    }, [user, loading, router]);
+
+
+    if (loading || !user) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <p>Loading...</p>
+            </div>
+        );
     }
-    fetchOrders();
-  }, [user, loading, router]);
 
-
-  if (loading || !user) {
     return (
-        <div className="flex items-center justify-center h-screen">
-            <p>Loading...</p>
+        <div className="container mx-auto px-4 py-12">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-headline font-bold">My Dashboard</h1>
+                <Button onClick={logout} variant="outline">Logout</Button>
+            </div>
+            <div className="space-y-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Welcome, {user.user_metadata?.full_name || user.email}</CardTitle>
+                        <CardDescription>
+                            This is your personal dashboard. You can view your recent orders and manage your account details here.
+                        </CardDescription>
+                    </CardHeader>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>My Order History</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {ordersLoading ? <p>Loading orders...</p> : <OrderHistory orders={orders} onOrderUpdate={fetchOrders} />}
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-headline font-bold">My Dashboard</h1>
-        <Button onClick={logout} variant="outline">Logout</Button>
-      </div>
-      <div className="space-y-8">
-        <Card>
-            <CardHeader>
-            <CardTitle>Welcome, {user.displayName || user.email}</CardTitle>
-            <CardDescription>
-                This is your personal dashboard. You can view your recent orders and manage your account details here.
-            </CardDescription>
-            </CardHeader>
-        </Card>
-        <Card>
-            <CardHeader>
-                <CardTitle>My Order History</CardTitle>
-            </CardHeader>
-            <CardContent>
-                {ordersLoading ? <p>Loading orders...</p> : <OrderHistory orders={orders} onOrderUpdate={fetchOrders} />}
-            </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
 }

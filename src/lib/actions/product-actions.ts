@@ -2,72 +2,84 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { db } from "@/lib/firebase";
-import { adminDb } from "@/lib/firebase-admin";
-import { collection, getDocs, getDoc, doc, writeBatch, setDoc, updateDoc, query } from 'firebase/firestore';
+import { createClient } from "@/lib/supabase/server";
 import type { Product } from '@/lib/types';
 import { products as initialProducts } from '@/lib/data';
 
-const productsCollectionRef = collection(db, 'products');
-const productsAdminCollectionRef = adminDb.collection('products');
-
 export async function seedInitialProducts() {
-  const q = query(collection(db, "products"));
-  const querySnapshot = await getDocs(q);
+  const supabase = await createClient();
+  const { count } = await supabase.from('products').select('*', { count: 'exact', head: true });
 
-  if (querySnapshot.empty) {
+  if (count === 0) {
     console.log("Seeding initial products...");
-    const batch = writeBatch(db);
-    initialProducts.forEach((product) => {
-      // Use the product's string ID when creating the document reference
-      const docRef = doc(productsCollectionRef, product.id);
-      batch.set(docRef, product);
-    });
-    await batch.commit();
-    console.log("Initial products seeded successfully.");
-    revalidatePath("/");
-    revalidatePath("/admin/products");
+    // Supabase insert supports array of objects
+    const { error } = await supabase.from('products').insert(initialProducts);
+
+    if (error) {
+      console.error("Error seeding products:", error);
+    } else {
+      console.log("Initial products seeded successfully.");
+      revalidatePath("/");
+      revalidatePath("/admin/products");
+    }
   }
 }
 
 export async function getProducts(): Promise<Product[]> {
-    try {
-        const querySnapshot = await getDocs(productsCollectionRef);
-        if (querySnapshot.empty) {
-            await seedInitialProducts();
-            const refreshedSnapshot = await getDocs(productsCollectionRef);
-            return refreshedSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        }
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-    } catch (error) {
-        console.error("Error fetching products: ", error);
-        return [];
+  const supabase = await createClient();
+  try {
+    const { data, error, count } = await supabase.from('products').select('*', { count: 'exact' });
+
+    if (error) throw error;
+
+    if (count === 0) {
+      await seedInitialProducts();
+      const { data: refreshedData } = await supabase.from('products').select('*');
+      return (refreshedData as Product[]) || [];
     }
+
+    return (data as Product[]) || [];
+  } catch (error) {
+    console.error("Error fetching products: ", error);
+    return [];
+  }
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-    if (!id) return null;
-    try {
-        const productDoc = await getDoc(doc(db, 'products', id));
-        if (productDoc.exists()) {
-            return { id: productDoc.id, ...productDoc.data() } as Product;
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching product by ID:", error);
-        return null;
-    }
+  if (!id) return null;
+  const supabase = await createClient();
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) return null; // .single() returns error if not found or multiple
+    return data as Product;
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    return null;
+  }
 }
 
 // The data coming from the form won't have an ID.
 export async function addProduct(productData: Omit<Product, 'id'>) {
+  const supabase = await createClient();
   try {
-    // Use the adminDb instance for this server-side write operation
-    const newDocRef = await productsAdminCollectionRef.add(productData);
-    
+    // We let Supabase generate the ID or we can generate one if we want specific format.
+    // Assuming Supabase 'products' table has 'id' as uuid default gen_random_uuid() or similar.
+    const { data, error } = await supabase
+      .from('products')
+      .insert(productData)
+      .select()
+      .single();
+
+    if (error) throw error;
+
     revalidatePath("/admin/products");
-    
-    return { id: newDocRef.id, ...productData };
+
+    return data as Product;
   } catch (error) {
     console.error("Error adding product: ", error);
     throw new Error("Could not add product.");
@@ -76,10 +88,16 @@ export async function addProduct(productData: Omit<Product, 'id'>) {
 
 
 export async function updateProduct(product: Product) {
+  const supabase = await createClient();
   try {
     const { id, ...productData } = product;
-    // Use the adminDb instance for this server-side write operation
-    await productsAdminCollectionRef.doc(id).update(productData);
+
+    const { error } = await supabase
+      .from('products')
+      .update(productData)
+      .eq('id', id);
+
+    if (error) throw error;
 
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/edit/${id}`);
@@ -91,12 +109,18 @@ export async function updateProduct(product: Product) {
 }
 
 export async function deleteProduct(productId: string) {
+  const supabase = await createClient();
   try {
     if (!productId) {
-        throw new Error("Product ID is required.");
+      throw new Error("Product ID is required.");
     }
-    // Use the adminDb instance for this server-side write operation
-    await productsAdminCollectionRef.doc(productId).delete();
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+
+    if (error) throw error;
+
     revalidatePath("/admin/products");
   } catch (error) {
     console.error("Error deleting product: ", error);

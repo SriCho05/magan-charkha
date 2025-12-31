@@ -28,13 +28,13 @@ export default function CartSheet() {
 
   const handleCheckout = async () => {
     if (!user) {
-        toast({
-            title: "Authentication required",
-            description: "Please log in to proceed to checkout.",
-            variant: "destructive",
-        });
-        router.push("/login");
-        return;
+      toast({
+        title: "Authentication required",
+        description: "Please log in to proceed to checkout.",
+        variant: "destructive",
+      });
+      router.push("/login");
+      return;
     }
     router.push("/checkout");
   }
@@ -74,7 +74,7 @@ export default function CartSheet() {
                     <div className="flex-grow">
                       <p className="font-semibold">{item.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        ₹{item.price.toFixed(2)}
+                        Rs. {item.price.toFixed(2)}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <Button
@@ -97,10 +97,10 @@ export default function CartSheet() {
                       </div>
                     </div>
                     <div className="flex flex-col justify-between items-end">
-                       <p className="font-semibold">₹{(item.price * item.quantity).toFixed(2)}</p>
-                       <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => removeFromCart(item.id)}>
-                           <Trash2 className="h-4 w-4" />
-                       </Button>
+                      <p className="font-semibold">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => removeFromCart(item.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -110,7 +110,7 @@ export default function CartSheet() {
               <div className="w-full space-y-4">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Subtotal</span>
-                  <span>₹{cartTotal.toFixed(2)}</span>
+                  <span>Rs. {cartTotal.toFixed(2)}</span>
                 </div>
                 <Button className="w-full" size="lg" onClick={handleCheckout}>
                   Proceed to Checkout
